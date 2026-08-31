@@ -1,0 +1,268 @@
+"use client";
+
+import Link from "next/link";
+import {
+  AlertTriangle,
+  ArrowRight,
+  BriefcaseBusiness,
+  CheckCircle2,
+  FileCheck2,
+  KeyRound,
+  Plus,
+  Sparkles,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useDemo } from "@/lib/store";
+import {
+  Badge,
+  Button,
+  EmptyState,
+  PageHeader,
+  Progress,
+  SectionTitle,
+} from "@/components/ui";
+
+export default function DashboardPage() {
+  const { state } = useDemo();
+  const [aiConfigured, setAiConfigured] = useState(false);
+  useEffect(() => {
+    void fetch("/api/ai/config", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((data: { configured?: boolean }) =>
+        setAiConfigured(Boolean(data.configured)),
+      );
+  }, []);
+  if (!state.workspace.id)
+    return (
+      <div className="animate-rise">
+        <PageHeader
+          eyebrow="WORKSPACE REQUIRED"
+          title="先创建 Workspace"
+          description="Workspace 是项目数据与权限的隔离边界。系统当前没有加载任何预置数据。"
+        />
+        <EmptyState
+          icon={<BriefcaseBusiness size={20} />}
+          title="尚未创建工作空间"
+          description="返回入口页，创建课程、团队或企业 Workspace。"
+          action={
+            <Link href="/">
+              <Button>创建 Workspace</Button>
+            </Link>
+          }
+        />
+      </div>
+    );
+  if (!state.project.id)
+    return (
+      <div className="animate-rise">
+        <PageHeader
+          eyebrow="EMPTY WORKSPACE"
+          title={`${state.workspace.name} 已就绪`}
+          description="当前空间没有项目和样例数据。先确认 DeepSeek 连接，再创建第一个真实项目。"
+          actions={
+            <Link href="/projects/new">
+              <Button>
+                <Plus size={15} />
+                创建项目
+              </Button>
+            </Link>
+          }
+        />
+        <div className="mb-6 grid gap-4 md:grid-cols-3">
+          <div className="card p-5">
+            <span className="grid size-10 place-items-center bg-[#e5f6ef] text-[#087d5d] dark:bg-[#103529]">
+              <CheckCircle2 size={18} />
+            </span>
+            <b className="mt-5 block">Workspace</b>
+            <p className="mt-1 text-xs text-[var(--muted)]">
+              {state.workspace.name}
+            </p>
+            <Badge tone="success" className="mt-4">
+              已就绪
+            </Badge>
+          </div>
+          <Link
+            href="/settings/ai"
+            className="card group p-5 transition hover:border-[#9dbb61]"
+          >
+            <span
+              className={`grid size-10 place-items-center ${aiConfigured ? "bg-[#e5f6ef] text-[#087d5d] dark:bg-[#103529]" : "bg-[#fff0dd] text-[#bd6414] dark:bg-[#3a2815]"}`}
+            >
+              <KeyRound size={18} />
+            </span>
+            <b className="mt-5 block">DeepSeek API</b>
+            <p className="mt-1 text-xs text-[var(--muted)]">
+              {aiConfigured ? "真实模型连接已配置" : "等待密钥文件或 API Key"}
+            </p>
+            <Badge tone={aiConfigured ? "success" : "warning"} className="mt-4">
+              {aiConfigured ? "已连接" : "待配置"}
+            </Badge>
+          </Link>
+          <Link
+            href="/projects/new"
+            className="card group p-5 transition hover:border-[#9dbb61]"
+          >
+            <span className="grid size-10 place-items-center bg-[#edf2f5] text-[#315d88] dark:bg-[#14283d]">
+              <BriefcaseBusiness size={18} />
+            </span>
+            <b className="mt-5 block">第一个项目</b>
+            <p className="mt-1 text-xs text-[var(--muted)]">
+              从空白业务目标与场景卡开始
+            </p>
+            <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#567c13]">
+              创建项目 <ArrowRight size={12} />
+            </span>
+          </Link>
+        </div>
+        <EmptyState
+          icon={<Sparkles size={20} />}
+          title="没有样例数据，正合适"
+          description="创建项目后，场景卡、POC、Eval、资产与报告将全部来自你的真实业务输入。"
+        />
+      </div>
+    );
+
+  const latestRun = state.evalSuites[0]?.runs.at(-1);
+  const evidenceTotal = state.stages.reduce(
+    (sum, stage) => sum + stage.evidenceCount,
+    0,
+  );
+  const criteriaTotal = state.stages.reduce(
+    (sum, stage) => sum + stage.criteriaTotal,
+    0,
+  );
+  const coverage = criteriaTotal
+    ? Math.round((evidenceTotal / criteriaTotal) * 100)
+    : 0;
+  const openRisks = state.risks.filter((risk) => risk.status !== "已关闭");
+  const pendingReviews = state.reviews.filter(
+    (review) => review.status === "待评审",
+  );
+  return (
+    <div className="animate-rise">
+      <PageHeader
+        eyebrow="LIVE WORKSPACE"
+        title="项目交付工作台"
+        description="所有指标来自当前项目的真实记录；未录入的数据保持为空或 0。"
+        actions={
+          <Link href="/projects/new">
+            <Button>
+              <Plus size={15} />
+              创建新项目
+            </Button>
+          </Link>
+        }
+      />
+      <div className="mb-6 grid gap-4 md:grid-cols-3">
+        {[
+          [
+            FileCheck2,
+            String(pendingReviews.length),
+            "待评审",
+            pendingReviews.length ? "warning" : "neutral",
+          ],
+          [
+            AlertTriangle,
+            String(openRisks.length),
+            "开放风险",
+            openRisks.some((risk) => risk.level === "高")
+              ? "danger"
+              : "neutral",
+          ],
+          [
+            CheckCircle2,
+            `${coverage}%`,
+            "证据覆盖率",
+            coverage >= 80 ? "success" : "neutral",
+          ],
+        ].map(([Icon, value, label, tone]) => (
+          <div key={String(label)} className="card flex items-center gap-4 p-5">
+            <span className="grid size-11 place-items-center bg-[#edf2f5] text-[#315d88] dark:bg-[#14283d]">
+              <Icon size={20} />
+            </span>
+            <div className="flex-1">
+              <b className="font-data text-2xl">{String(value)}</b>
+              <p className="text-xs text-[var(--muted)]">{String(label)}</p>
+            </div>
+            <Badge tone={tone as "neutral" | "success" | "warning" | "danger"}>
+              实时
+            </Badge>
+          </div>
+        ))}
+      </div>
+      <div className="grid items-start gap-6 xl:grid-cols-[1.35fr_.65fr]">
+        <section className="card p-5 sm:p-6">
+          <SectionTitle
+            title="当前项目"
+            meta="最近创建"
+            action={
+              <Link
+                href="/project/overview"
+                className="text-xs font-semibold text-[#567c13]"
+              >
+                进入项目 →
+              </Link>
+            }
+          />
+          <div className="grid gap-4 border-t border-[var(--line)] pt-5 sm:grid-cols-[1.5fr_1fr_1fr_1fr]">
+            <div>
+              <b>{state.project.name}</b>
+              <p className="mt-1 text-xs text-[var(--muted)]">
+                {state.project.organization || "未设置组织"}
+              </p>
+            </div>
+            <div>
+              <span className="text-[10px] text-[var(--muted)]">当前阶段</span>
+              <p className="mt-2">
+                <Badge tone="info">
+                  {state.project.stage || "P0 场景立项"}
+                </Badge>
+              </p>
+            </div>
+            <div>
+              <span className="text-[10px] text-[var(--muted)]">
+                Eval 通过率
+              </span>
+              <div className="mt-3">
+                <Progress
+                  value={latestRun?.successRate || 0}
+                  label={`${latestRun?.successRate || 0}%`}
+                  tone="success"
+                />
+              </div>
+            </div>
+            <div>
+              <span className="text-[10px] text-[var(--muted)]">证据覆盖</span>
+              <div className="mt-3">
+                <Progress value={coverage} label={`${coverage}%`} />
+              </div>
+            </div>
+          </div>
+        </section>
+        <aside className="card p-5">
+          <SectionTitle
+            title="最近活动"
+            meta={`${state.activities.length} 条真实操作`}
+          />
+          {state.activities.length ? (
+            state.activities.slice(0, 5).map((activity) => (
+              <div
+                key={activity.id}
+                className="border-t border-[var(--line)] py-3 first:border-t-0"
+              >
+                <p className="text-xs font-semibold">{activity.text}</p>
+                <p className="mt-1 text-[10px] text-[var(--muted)]">
+                  {activity.actor} · {activity.time}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="border-t border-[var(--line)] py-6 text-center text-xs text-[var(--muted)]">
+              尚无项目活动
+            </p>
+          )}
+        </aside>
+      </div>
+    </div>
+  );
+}

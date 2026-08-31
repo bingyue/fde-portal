@@ -1,0 +1,2 @@
+-- Intentionally empty: production/live mode does not insert sample business data.
+-- Create the first Workspace and Project through the application after authentication.
