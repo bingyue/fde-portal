@@ -150,7 +150,7 @@ export default function AISettingsPage() {
             <SectionTitle title="当前连接" />
             <div className="flex items-center gap-4">
               <span
-                className={`grid size-11 place-items-center ${status.configured ? "bg-[#e5f6ef] text-[#087d5d] dark:bg-[#103529]" : "bg-[#fff0dd] text-[#bd6414] dark:bg-[#3a2815]"}`}
+                className={`grid size-11 place-items-center ${status.configured ? "bg-[var(--success-soft)] text-[var(--success)]" : "bg-[var(--warning-soft)] text-[var(--warning)]"}`}
               >
                 {loading ? (
                   <LoaderCircle size={20} className="animate-spin" />
@@ -197,8 +197,8 @@ export default function AISettingsPage() {
               </dl>
             )}
           </section>
-          <section className="border border-[#b5ce7d] bg-[#f2f8e7] p-5 dark:border-[#486824] dark:bg-[#172b18]">
-            <div className="flex items-center gap-2 text-[#527411] dark:text-[#b8f34b]">
+          <section className="rounded-[var(--radius-md)] border border-[var(--primary-border)] bg-[var(--primary-soft)] p-5">
+            <div className="flex items-center gap-2 text-[var(--primary-ink)]">
               <ShieldCheck size={16} />
               <b className="text-xs">密钥安全边界</b>
             </div>
@@ -212,7 +212,7 @@ export default function AISettingsPage() {
         </aside>
         <section className="card p-5 sm:p-7">
           <div className="mb-6 flex items-center gap-3 border-b border-[var(--line)] pb-5">
-            <span className="grid size-10 place-items-center bg-[#0c1e3a] text-[#b8f34b]">
+            <span className="grid size-10 place-items-center rounded-[var(--radius-md)] bg-[var(--primary)] text-white dark:text-[#071426]">
               <KeyRound size={18} />
             </span>
             <div>
@@ -240,7 +240,7 @@ export default function AISettingsPage() {
                 }
               />
             </Field>
-            <div className="relative border border-dashed border-[#9ba7b5] bg-[#f7f9fa] p-5 text-center dark:bg-[#101f31]">
+            <div className="relative rounded-[var(--radius-md)] border border-dashed border-[var(--line-strong)] bg-[var(--surface-subtle)] p-5 text-center">
               <input
                 type="file"
                 accept=".env,.txt,text/plain"
@@ -249,7 +249,7 @@ export default function AISettingsPage() {
                 onChange={(event) => void readKeyFile(event.target.files?.[0])}
               />
               <div className="pointer-events-none">
-                <span className="mx-auto grid size-9 place-items-center bg-[#e8eef3] text-[#315d88] dark:bg-[#182b40]">
+                <span className="mx-auto grid size-9 place-items-center bg-[var(--primary-soft)] text-[var(--primary)]">
                   <Upload size={16} />
                 </span>
                 <b className="mt-3 block text-xs">或选择密钥文件</b>
@@ -284,7 +284,7 @@ export default function AISettingsPage() {
             {message && (
               <div
                 role="status"
-                className={`flex items-start gap-3 border p-3 text-xs leading-5 ${message.tone === "success" ? "border-[#9dca7f] bg-[#f1f8e9] text-[#3f6913] dark:bg-[#172b18] dark:text-[#b8f34b]" : "border-[#e0a19d] bg-[#fff2f0] text-[#a73732] dark:bg-[#351f20] dark:text-[#f09a95]"}`}
+                className={`flex items-start gap-3 rounded-[var(--radius-md)] border p-3 text-xs leading-5 ${message.tone === "success" ? "border-[var(--success-border)] bg-[var(--success-soft)] text-[var(--success)]" : "border-[var(--danger-border)] bg-[var(--danger-soft)] text-[var(--danger)]"}`}
               >
                 {message.tone === "success" ? (
                   <CheckCircle2 size={15} className="mt-0.5 shrink-0" />

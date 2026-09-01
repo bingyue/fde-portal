@@ -76,14 +76,14 @@ export default function PocPage() {
           <button
             key={item.id}
             onClick={() => setSelectedId(item.id)}
-            className={`border p-3 text-left transition ${selectedId === item.id ? "border-[#769d2d] bg-[#f1f7e7] dark:bg-[#1a301b]" : "border-[var(--line)] bg-[var(--surface)] hover:border-[#9da8b5]"}`}
+            className={`rounded-[var(--radius-md)] border p-3 text-left transition ${selectedId === item.id ? "border-[var(--primary)] bg-[var(--primary-soft)]" : "border-[var(--line)] bg-[var(--surface)] hover:border-[var(--line-strong)]"}`}
           >
             <div className="mb-5 flex justify-between">
               <span className="font-data text-xs font-extrabold">
                 {item.code}
               </span>
               <span
-                className={`size-2 ${item.status === "已通过" ? "bg-[#159a74]" : item.status === "存在风险" ? "bg-[#d17522]" : "bg-[#b8c0ca]"}`}
+                className={`size-2 ${item.status === "已通过" ? "bg-[var(--success)]" : item.status === "存在风险" ? "bg-[var(--warning)]" : "bg-[var(--line-strong)]"}`}
               />
             </div>
             <b className="block text-xs">{item.name}</b>
@@ -99,7 +99,7 @@ export default function PocPage() {
             <div className="flex flex-col justify-between gap-4 border-b border-[var(--line)] pb-5 sm:flex-row sm:items-start">
               <div>
                 <div className="flex items-center gap-3">
-                  <span className="font-data grid size-10 place-items-center bg-[#0c1e3a] font-black text-[#b8f34b]">
+                  <span className="font-data grid size-10 place-items-center rounded-[var(--radius-md)] bg-[var(--primary)] font-black text-white dark:text-[#071426]">
                     {stage.code}
                   </span>
                   <div>
@@ -196,7 +196,7 @@ export default function PocPage() {
                         criterion &&
                         toggleAcceptanceCriterion(stage.id, criterion.id)
                       }
-                      className={`grid size-5 place-items-center border ${passed ? "border-[#159a74] bg-[#159a74] text-white" : "border-[#aab4c0]"}`}
+                      className={`grid size-5 place-items-center rounded-[var(--radius-sm)] border ${passed ? "border-[var(--success)] bg-[var(--success)] text-white" : "border-[var(--line-strong)]"}`}
                     >
                       {passed && <Check size={12} />}
                     </button>
@@ -220,10 +220,10 @@ export default function PocPage() {
             </div>
           </section>
           {stage.code === "P3" && risk && (
-            <section className="border border-[#e2a16b] bg-[#fff8ee] p-5 dark:border-[#74471f] dark:bg-[#2c2116]">
+            <section className="rounded-[var(--radius-md)] border border-[var(--warning-border)] bg-[var(--warning-soft)] p-5">
               <SectionTitle title="关联风险" meta="高风险未关闭将阻塞门禁" />
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <span className="grid size-10 shrink-0 place-items-center bg-[#fde7d0] text-[#bd6414] dark:bg-[#462c18]">
+                <span className="grid size-10 shrink-0 place-items-center bg-[var(--warning-soft)] text-[var(--warning)]">
                   <AlertOctagon size={19} />
                 </span>
                 <div className="flex-1">
@@ -277,7 +277,7 @@ export default function PocPage() {
                 className="flex items-center gap-3 border-t border-[var(--line)] py-3 first:border-t-0"
               >
                 <span
-                  className={`grid size-6 place-items-center ${ok ? "bg-[#e5f6ef] text-[#087d5d] dark:bg-[#103529]" : "bg-[#fff0dd] text-[#bd6414] dark:bg-[#3a2815]"}`}
+                  className={`grid size-6 place-items-center ${ok ? "bg-[var(--success-soft)] text-[var(--success)]" : "bg-[var(--warning-soft)] text-[var(--warning)]"}`}
                 >
                   {ok ? <Check size={13} /> : <LockKeyhole size={12} />}
                 </span>
@@ -296,8 +296,8 @@ export default function PocPage() {
             </Button>
           </section>
           {stage.blockers.length > 0 && (
-            <section className="border border-[#e1a166] bg-[#fff8ee] p-5 dark:bg-[#2c2116]">
-              <div className="flex items-center gap-2 text-[#a95711]">
+            <section className="rounded-[var(--radius-md)] border border-[var(--warning-border)] bg-[var(--warning-soft)] p-5">
+              <div className="flex items-center gap-2 text-[var(--warning)]">
                 <ShieldAlert size={16} />
                 <b className="text-xs">系统识别的阻塞项</b>
               </div>

@@ -83,13 +83,13 @@ export default function NewProjectPage() {
                 type="button"
                 key={String(item)}
                 onClick={() => setType(item as Project["type"])}
-                className={`flex items-start gap-3 border p-4 text-left transition ${type === item ? "border-[#769d2d] bg-[#f2f8e8] dark:bg-[#1a301b]" : "border-[var(--line)] hover:border-[#98a5b4]"}`}
+                className={`flex items-start gap-3 rounded-[var(--radius-md)] border p-4 text-left transition ${type === item ? "border-[var(--primary)] bg-[var(--primary-soft)]" : "border-[var(--line)] hover:border-[var(--line-strong)]"}`}
               >
                 <Icon
                   size={18}
                   className={
                     type === item
-                      ? "text-[#5f8617] dark:text-[#b8f34b]"
+                      ? "text-[var(--primary)]"
                       : "text-[var(--muted)]"
                   }
                 />
@@ -103,7 +103,7 @@ export default function NewProjectPage() {
             ))}
           </div>
           <h2 className="mb-4 mt-7 font-bold">02 · 创建方式</h2>
-          <div className="flex items-center gap-3 border border-[#769d2d] p-3 text-xs text-[#527411] dark:text-[#b8f34b]">
+          <div className="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--primary-border)] bg-[var(--primary-soft)] p-3 text-xs text-[var(--primary-ink)]">
             <FilePlus2 size={16} />
             空白项目
           </div>
@@ -116,7 +116,7 @@ export default function NewProjectPage() {
                 当前 Workspace：{state.workspace.name}
               </p>
             </div>
-            <span className="font-data text-[10px] font-bold text-[#668c1e]">
+            <span className="font-data text-[10px] font-bold text-[var(--primary)]">
               空白项目
             </span>
           </div>

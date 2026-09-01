@@ -132,7 +132,7 @@ export default function SkillsPage() {
         actions={
           <a
             href={`${skillsManifest.source}/archive/refs/heads/${skillsManifest.branch}.zip`}
-            className="inline-flex min-h-9 items-center gap-2 border border-[var(--line)] bg-[var(--surface)] px-3.5 py-2 text-[13px] font-semibold"
+            className="inline-flex min-h-9 items-center gap-2 rounded-[var(--radius-sm)] border border-[var(--line)] bg-[var(--surface)] px-3.5 py-2 text-[13px] font-semibold"
             target="_blank"
             rel="noreferrer"
           >
@@ -141,7 +141,7 @@ export default function SkillsPage() {
           </a>
         }
       />
-      <section className="mb-6 grid gap-px border border-[var(--line)] bg-[var(--line)] sm:grid-cols-2 lg:grid-cols-4">
+      <section className="mb-6 grid gap-px overflow-hidden rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--line)] sm:grid-cols-2 lg:grid-cols-4">
         {[
           ["已初始化 Skill", skillsManifest.total],
           ["分类", categories.length - 1],
@@ -151,7 +151,7 @@ export default function SkillsPage() {
           <div key={String(label)} className="bg-[var(--surface)] p-4">
             <span className="text-[10px] text-[var(--muted)]">{label}</span>
             <b
-              className={`font-data mt-1 block ${index < 2 ? "text-2xl" : "text-lg"} ${index === 3 ? "text-[#bd6414]" : ""}`}
+              className={`font-data mt-1 block ${index < 2 ? "text-2xl" : "text-lg"} ${index === 3 ? "text-[var(--warning)]" : ""}`}
             >
               {value}
             </b>
@@ -160,7 +160,7 @@ export default function SkillsPage() {
       </section>
       <section className="card mb-6 p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          <label className="flex min-h-10 flex-1 items-center gap-2 border border-[var(--line)] bg-[var(--surface)] px-3">
+          <label className="flex min-h-10 flex-1 items-center gap-2 rounded-[var(--radius-sm)] border border-[var(--line)] bg-[var(--surface)] px-3">
             <Search size={15} className="text-[var(--muted)]" />
             <input
               value={query}
@@ -174,7 +174,7 @@ export default function SkillsPage() {
               <button
                 key={item}
                 onClick={() => setCategory(item)}
-                className={`shrink-0 border px-3 py-2 text-xs ${category === item ? "border-[#769d2d] bg-[#f2f8e8] text-[#527411] dark:bg-[#1a301b] dark:text-[#b8f34b]" : "border-[var(--line)] text-[var(--muted)]"}`}
+                className={`shrink-0 rounded-[var(--radius-sm)] border px-3 py-2 text-xs ${category === item ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--primary-ink)]" : "border-[var(--line)] text-[var(--muted)]"}`}
               >
                 {item}
               </button>
@@ -191,7 +191,7 @@ export default function SkillsPage() {
           href={skillsManifest.source}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1 text-xs font-semibold text-[#567c13]"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--primary)]"
         >
           查看 GitHub 源仓库 <ExternalLink size={12} />
         </a>
@@ -200,10 +200,10 @@ export default function SkillsPage() {
         {filtered.map((skill) => (
           <article
             key={skill.id}
-            className="card group flex min-h-64 flex-col p-5 transition hover:-translate-y-0.5 hover:border-[#9dbb61]"
+            className="card group flex min-h-64 flex-col p-5 transition hover:-translate-y-0.5 hover:border-[var(--primary-border)]"
           >
             <div className="flex items-start justify-between">
-              <span className="grid size-10 place-items-center bg-[#edf2f5] text-[#315d88] dark:bg-[#14283d] dark:text-[#91b9df]">
+              <span className="grid size-10 place-items-center rounded-[var(--radius-md)] bg-[var(--primary-soft)] text-[var(--primary)]">
                 {skill.hasScripts ? (
                   <Code2 size={17} />
                 ) : (
@@ -227,7 +227,7 @@ export default function SkillsPage() {
               </div>
               <button
                 onClick={() => openSkill(skill)}
-                className="inline-flex items-center gap-1 text-xs font-bold text-[#567c13] dark:text-[#b8f34b]"
+                className="inline-flex items-center gap-1 text-xs font-bold text-[var(--primary)]"
               >
                 查看与运行 <ChevronRight size={13} />
               </button>
@@ -236,7 +236,7 @@ export default function SkillsPage() {
         ))}
       </div>
       {filtered.length === 0 && (
-        <div className="grid min-h-56 place-items-center border border-dashed border-[var(--line)] bg-[var(--surface)] text-center">
+        <div className="grid min-h-56 place-items-center rounded-[var(--radius-md)] border border-dashed border-[var(--line)] bg-[var(--surface)] text-center">
           <div>
             <Search className="mx-auto text-[var(--muted)]" />
             <b className="mt-3 block">没有匹配的 Skill</b>
@@ -245,7 +245,7 @@ export default function SkillsPage() {
                 setQuery("");
                 setCategory("全部");
               }}
-              className="mt-2 text-xs text-[#567c13]"
+              className="mt-2 text-xs text-[var(--primary)]"
             >
               清除筛选
             </button>
@@ -285,7 +285,7 @@ export default function SkillsPage() {
                 <a
                   href={selected.downloadUrl}
                   download
-                  className="inline-flex min-h-9 items-center justify-center gap-2 border border-[#0c1e3a] bg-[#0c1e3a] px-3.5 py-2 text-xs font-semibold text-white dark:border-[#b8f34b] dark:bg-[#b8f34b] dark:text-[#0c1e3a]"
+                  className="inline-flex min-h-9 items-center justify-center gap-2 rounded-[var(--radius-sm)] border border-[var(--primary)] bg-[var(--primary)] px-3.5 py-2 text-xs font-semibold text-white hover:bg-[var(--primary-hover)] dark:text-[#071426]"
                 >
                   <Download size={14} />
                   下载 ZIP
@@ -294,18 +294,18 @@ export default function SkillsPage() {
                   href={selected.sourceUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex min-h-9 items-center justify-center gap-2 border border-[var(--line)] px-3.5 py-2 text-xs font-semibold"
+                  className="inline-flex min-h-9 items-center justify-center gap-2 rounded-[var(--radius-sm)] border border-[var(--line)] px-3.5 py-2 text-xs font-semibold"
                 >
                   <ExternalLink size={14} />
                   查看源码
                 </a>
               </div>
             </div>
-            <section className="border border-[#b5ce7d] bg-[#f2f8e7] p-4 dark:border-[#486824] dark:bg-[#172b18]">
+            <section className="rounded-[var(--radius-md)] border border-[var(--primary-border)] bg-[var(--primary-soft)] p-4">
               <div className="flex items-start gap-3">
                 <ShieldCheck
                   size={18}
-                  className="mt-0.5 shrink-0 text-[#668c1e] dark:text-[#b8f34b]"
+                  className="mt-0.5 shrink-0 text-[var(--primary)]"
                 />
                 <div>
                   <b className="text-xs">在线执行安全边界</b>
@@ -333,7 +333,7 @@ export default function SkillsPage() {
                 />
               </Field>
               {error && (
-                <div className="mt-3 flex items-center gap-2 bg-[#fde9e7] p-3 text-xs text-[#b53b36] dark:bg-[#3b201f]">
+                <div className="mt-3 flex items-center gap-2 bg-[var(--danger-soft)] p-3 text-xs text-[var(--danger)]">
                   <AlertTriangle size={14} />
                   {error}
                 </div>
@@ -353,8 +353,8 @@ export default function SkillsPage() {
               </div>
             </section>
             {task && (
-              <section className="border border-[var(--line)]">
-                <div className="flex items-center justify-between border-b border-[var(--line)] bg-[#f7f9fa] px-4 py-3 dark:bg-[#101f31]">
+              <section className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--line)]">
+                <div className="flex items-center justify-between border-b border-[var(--line)] bg-[var(--surface-subtle)] px-4 py-3">
                   <div className="flex items-center gap-2">
                     <TerminalSquare size={15} />
                     <b className="text-xs">后台任务</b>
@@ -377,20 +377,21 @@ export default function SkillsPage() {
                     );
                   })()}
                 </div>
-                <div className="bg-[#0b182a] p-4 font-data text-[11px] leading-6 text-[#b7c4d5]">
+                <div className="bg-[var(--console-bg)] p-4 font-data text-[11px] leading-6 text-[var(--console-ink)]">
                   {task.logs.map((item, index) => (
                     <p key={`${item.at}-${index}`}>
-                      <span className="text-[#6d829e]">
+                      <span className="text-[var(--console-muted)]">
                         {new Date(item.at).toLocaleTimeString("zh-CN", {
                           hour12: false,
                         })}
                       </span>{" "}
-                      <span className="text-[#b8f34b]">›</span> {item.message}
+                      <span className="text-[var(--primary)]">›</span>{" "}
+                      {item.message}
                     </p>
                   ))}
                 </div>
                 {task.error && (
-                  <div className="bg-[#fde9e7] p-4 text-xs text-[#b53b36]">
+                  <div className="bg-[var(--danger-soft)] p-4 text-xs text-[var(--danger)]">
                     {task.error}
                   </div>
                 )}
@@ -402,12 +403,12 @@ export default function SkillsPage() {
                         onClick={() =>
                           navigator.clipboard.writeText(task.result || "")
                         }
-                        className="text-[10px] text-[#567c13]"
+                        className="text-[10px] text-[var(--primary)]"
                       >
                         复制 Markdown
                       </button>
                     </div>
-                    <pre className="max-h-96 overflow-auto whitespace-pre-wrap border border-[var(--line)] bg-[#f8fafb] p-4 font-sans text-xs leading-6 text-[var(--ink)] dark:bg-[#0a1726]">
+                    <pre className="max-h-96 overflow-auto whitespace-pre-wrap rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface-subtle)] p-4 font-sans text-xs leading-6 text-[var(--ink)]">
                       {task.result}
                     </pre>
                   </div>

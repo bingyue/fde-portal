@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Building2,
   Check,
+  CircleCheck,
   GraduationCap,
   KeyRound,
   LockKeyhole,
@@ -14,9 +15,19 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ThemeSelector } from "@/components/theme-provider";
 import { Button, Field, Input, Modal, Select } from "@/components/ui";
 import { DemoProvider, useDemo } from "@/lib/store";
 import type { Workspace } from "@/lib/types";
+
+const deliveryStages = [
+  ["P0", "场景立项", "价值假设与边界"],
+  ["P1", "场景澄清", "人机协作与基线"],
+  ["P2", "评测准备", "测试集与阈值"],
+  ["P3", "技术验证", "多版本 Eval"],
+  ["P4", "业务试用", "真实用户验证"],
+  ["P5", "生产决策", "证据与验收结论"],
+] as const;
 
 function Welcome() {
   const router = useRouter();
@@ -25,6 +36,7 @@ function Welcome() {
   const [name, setName] = useState("");
   const [type, setType] = useState<Workspace["type"]>("企业空间");
   const [aiConfigured, setAiConfigured] = useState(false);
+
   useEffect(() => {
     void fetch("/api/ai/config", { cache: "no-store" })
       .then((response) => response.json())
@@ -32,63 +44,80 @@ function Welcome() {
         setAiConfigured(Boolean(data.configured)),
       );
   }, []);
+
+  const readiness = [
+    [
+      "01",
+      "Workspace",
+      Boolean(state.workspace.id),
+      state.workspace.id ? state.workspace.name : "尚未创建",
+    ],
+    [
+      "02",
+      "DeepSeek API",
+      aiConfigured,
+      aiConfigured ? "真实连接已配置" : "等待服务端密钥",
+    ],
+    [
+      "03",
+      "业务项目",
+      Boolean(state.project.id),
+      state.project.id ? state.project.name : "等待创建",
+    ],
+  ] as const;
+
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#09182d] text-white">
-      <div
-        className="absolute inset-0 opacity-50"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(184,243,75,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(184,243,75,.06) 1px, transparent 1px)",
-          backgroundSize: "42px 42px",
-        }}
-      />
-      <div className="absolute -right-32 top-20 size-[520px] rounded-full border border-[#b8f34b]/10" />
-      <div className="absolute -right-16 top-36 size-[390px] rounded-full border border-[#b8f34b]/10" />
-      <div className="relative mx-auto flex min-h-screen max-w-[1380px] flex-col px-6 py-6 lg:px-12">
-        <header className="flex items-center justify-between border-b border-white/10 pb-5">
+    <main className="relative min-h-screen overflow-hidden bg-[var(--paper)] text-[var(--ink)]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[560px] bg-[radial-gradient(circle_at_72%_16%,color-mix(in_srgb,var(--primary)_12%,transparent),transparent_38%),linear-gradient(180deg,var(--surface),transparent)]" />
+      <div className="relative mx-auto flex min-h-screen max-w-[1440px] flex-col px-5 py-5 sm:px-8 lg:px-12">
+        <header className="flex items-center justify-between border-b border-[var(--line)] pb-5">
           <div className="flex items-center gap-3">
-            <span className="grid size-9 place-items-center bg-[#b8f34b] font-data font-black text-[#09182d]">
+            <span className="grid size-10 place-items-center rounded-[var(--radius-md)] bg-[var(--primary)] font-data font-black text-white shadow-sm">
               F
             </span>
             <div>
-              <b className="font-data tracking-[.1em]">FDE PORTAL</b>
-              <span className="ml-3 hidden text-[10px] uppercase tracking-[.2em] text-[#7890ae] sm:inline">
-                Proof before scale
+              <b className="font-data block tracking-[.08em]">FDE PORTAL</b>
+              <span className="block text-[8px] font-bold uppercase tracking-[.16em] text-[var(--muted)]">
+                AI DELIVERY MANAGEMENT
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-3 text-xs text-[#94a5b9]">
-            <LockKeyhole size={13} />
-            真实数据模式 · 服务端密钥隔离
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="hidden items-center gap-2 text-xs text-[var(--muted)] sm:flex">
+              <LockKeyhole size={13} className="text-[var(--success)]" />
+              真实数据模式 · 服务端密钥隔离
+            </div>
+            <ThemeSelector />
           </div>
         </header>
-        <section className="grid flex-1 items-center gap-12 py-12 lg:grid-cols-[1.05fr_.95fr] lg:py-20">
+
+        <section className="grid items-center gap-12 py-14 lg:grid-cols-[1.08fr_.92fr] lg:py-20">
           <div className="animate-rise">
-            <p className="font-data mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-[.24em] text-[#b8f34b]">
-              <span className="h-px w-8 bg-[#b8f34b]" />
-              AI PROJECT DELIVERY OS
+            <p className="font-data mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-[.2em] text-[var(--primary)]">
+              <span className="h-px w-8 bg-[var(--primary)]" />
+              FDE AI DELIVERY OPERATING SYSTEM
             </p>
-            <h1 className="max-w-3xl text-4xl font-bold leading-[1.16] tracking-tight sm:text-5xl lg:text-[64px]">
-              从空白业务问题，
+            <h1 className="max-w-3xl text-4xl font-bold leading-[1.15] tracking-[-.035em] sm:text-5xl lg:text-[62px]">
+              让 AI 项目从场景定义，
               <br />
-              <span className="text-[#b8f34b]">建立可验收的 AI 项目。</span>
+              <span className="text-[var(--primary)]">走到可验收交付。</span>
             </h1>
-            <p className="mt-7 max-w-2xl text-base leading-8 text-[#a9b6c8] sm:text-lg">
-              系统不再加载任何样例项目。创建 Workspace，配置真实
-              DeepSeek，再从你的企业场景开始建立证据链。
+            <p className="mt-7 max-w-2xl text-base leading-8 text-[var(--muted)] sm:text-lg">
+              为 FDE 团队统一管理需求澄清、POC、Eval、风险、评审与验收，
+              让每个生产决策都有真实数据和可追溯证据。
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               {state.workspace.id ? (
                 <Button
                   onClick={() => router.push("/dashboard")}
-                  className="!border-[#b8f34b] !bg-[#b8f34b] !px-5 !text-[#09182d]"
+                  className="!px-5"
                 >
                   进入 {state.workspace.name} <ArrowRight size={16} />
                 </Button>
               ) : (
                 <Button
                   onClick={() => setWorkspaceOpen(true)}
-                  className="!border-[#b8f34b] !bg-[#b8f34b] !px-5 !text-[#09182d]"
+                  className="!px-5"
                 >
                   <Plus size={15} />
                   创建 Workspace
@@ -97,98 +126,128 @@ function Welcome() {
               <Button
                 variant="secondary"
                 onClick={() => router.push("/settings/ai")}
-                className="!border-white/20 !bg-white/[.06] !text-white"
               >
                 <KeyRound size={15} />
                 配置 DeepSeek
               </Button>
             </div>
-            <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-xs text-[#8ea0b7]">
-              {[
-                "零预置业务数据",
-                "密钥不进入浏览器存储",
-                "AI 输出需确认后写入",
-              ].map((item) => (
+            <div className="mt-9 flex flex-wrap gap-x-7 gap-y-3 text-xs text-[var(--muted)]">
+              {["需求可追踪", "评测可复现", "验收有证据"].map((item) => (
                 <span key={item} className="flex items-center gap-2">
-                  <Check size={13} className="text-[#b8f34b]" />
+                  <CircleCheck size={14} className="text-[var(--success)]" />
                   {item}
                 </span>
               ))}
             </div>
           </div>
+
           <div className="animate-rise-2 relative">
-            <div className="absolute -inset-5 border border-[#b8f34b]/10" />
-            <div className="relative border border-white/15 bg-[#0e213d]/90 p-6 shadow-2xl backdrop-blur sm:p-8">
-              <p className="font-data text-[10px] font-bold uppercase tracking-[.2em] text-[#7890ae]">
-                LIVE READINESS
-              </p>
-              <h2 className="mt-3 text-xl font-bold">生产连接准备</h2>
+            <div className="absolute -inset-5 rounded-[20px] border border-[var(--primary-border)]/60 bg-[var(--primary-soft)]/50" />
+            <div className="relative rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--surface)] p-6 shadow-[var(--shadow-lg)] sm:p-8">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-data text-[10px] font-bold uppercase tracking-[.18em] text-[var(--primary)]">
+                    DELIVERY READINESS
+                  </p>
+                  <h2 className="mt-2 text-xl font-bold">项目交付就绪度</h2>
+                </div>
+                <span className="rounded-full bg-[var(--primary-soft)] px-2.5 py-1 text-[10px] font-bold text-[var(--primary)]">
+                  LIVE
+                </span>
+              </div>
               <div className="mt-7 space-y-3">
-                {[
-                  [
-                    "01",
-                    "Workspace",
-                    Boolean(state.workspace.id),
-                    state.workspace.id ? state.workspace.name : "尚未创建",
-                  ],
-                  [
-                    "02",
-                    "DeepSeek API",
-                    aiConfigured,
-                    aiConfigured ? "连接已配置" : "等待密钥",
-                  ],
-                  [
-                    "03",
-                    "业务项目",
-                    Boolean(state.project.id),
-                    state.project.id ? state.project.name : "等待创建",
-                  ],
-                ].map(([code, label, ready, detail]) => (
+                {readiness.map(([code, label, ready, detail]) => (
                   <div
-                    key={String(code)}
-                    className="flex items-center gap-4 border border-white/10 bg-white/[.025] p-4"
+                    key={code}
+                    className="flex items-center gap-4 rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface-subtle)] p-4"
                   >
                     <span
-                      className={`font-data grid size-8 place-items-center text-[10px] font-black ${ready ? "bg-[#b8f34b] text-[#09182d]" : "border border-[#58708d] text-[#8ea0b7]"}`}
+                      className={`font-data grid size-9 place-items-center rounded-[var(--radius-sm)] text-[10px] font-black ${
+                        ready
+                          ? "bg-[var(--success-soft)] text-[var(--success)]"
+                          : "bg-[var(--surface-hover)] text-[var(--muted)]"
+                      }`}
                     >
-                      {String(code)}
+                      {ready ? <Check size={15} /> : code}
                     </span>
-                    <div className="flex-1">
-                      <b className="text-sm">{String(label)}</b>
-                      <p className="mt-1 text-[10px] text-[#7f92aa]">
-                        {String(detail)}
+                    <div className="min-w-0 flex-1">
+                      <b className="text-sm">{label}</b>
+                      <p className="mt-1 truncate text-[10px] text-[var(--muted)]">
+                        {detail}
                       </p>
                     </div>
                     <span
-                      className={`size-2 ${ready ? "bg-[#b8f34b]" : "bg-[#536b86]"}`}
+                      className={`size-2 rounded-full ${ready ? "bg-[var(--success)]" : "bg-[var(--line-strong)]"}`}
                     />
                   </div>
                 ))}
               </div>
-              <div className="mt-6 flex items-start gap-3 border-l-2 border-[#b8f34b] bg-white/[.04] px-4 py-3 text-xs leading-5 text-[#a9b6c8]">
+              <div className="mt-6 flex items-start gap-3 rounded-[var(--radius-md)] border border-[var(--primary-border)] bg-[var(--primary-soft)] px-4 py-3 text-xs leading-5 text-[var(--muted)]">
                 <ServerCog
                   size={16}
-                  className="mt-0.5 shrink-0 text-[#b8f34b]"
+                  className="mt-0.5 shrink-0 text-[var(--primary)]"
                 />
                 <span>
-                  <b className="text-white">DeepSeek V4 接口</b>
+                  <b className="text-[var(--primary-ink)]">真实模型连接</b>
                   <br />
-                  默认使用 deepseek-v4-flash；保存前通过 `/models` 真实验证。
+                  DeepSeek 配置保存在服务端，写入业务数据前必须人工确认。
                 </span>
               </div>
             </div>
           </div>
         </section>
-        <footer className="flex flex-col justify-between gap-3 border-t border-white/10 pt-5 text-[10px] uppercase tracking-[.14em] text-[#5f748e] sm:flex-row">
-          <span>FDE 课程实训 × 企业 AI 项目交付</span>
-          <span>DEEPSEEK V4 · SUPABASE READY · VERCEL READY</span>
+
+        <section className="animate-rise-3 mb-14 rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[var(--shadow)] sm:p-7">
+          <div className="mb-6 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+            <div>
+              <p className="font-data text-[10px] font-bold uppercase tracking-[.18em] text-[var(--primary)]">
+                DELIVERY GATES
+              </p>
+              <h2 className="mt-2 text-xl font-bold">
+                从业务问题到生产决策的六道门禁
+              </h2>
+            </div>
+            <p className="text-xs text-[var(--muted)]">
+              每一阶段都有负责人、验收项与证据
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+            {deliveryStages.map(([code, title, detail], index) => (
+              <div
+                key={code}
+                className="group relative rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface-subtle)] p-4 transition hover:border-[var(--primary-border)] hover:bg-[var(--primary-soft)]"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-data text-xs font-black text-[var(--primary)]">
+                    {code}
+                  </span>
+                  {index < deliveryStages.length - 1 && (
+                    <ArrowRight
+                      size={13}
+                      className="hidden text-[var(--line-strong)] lg:block"
+                    />
+                  )}
+                </div>
+                <b className="mt-5 block text-sm">{title}</b>
+                <p className="mt-1 text-[10px] leading-5 text-[var(--muted)]">
+                  {detail}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <footer className="mt-auto flex flex-col justify-between gap-3 border-t border-[var(--line)] py-5 text-[10px] uppercase tracking-[.12em] text-[var(--muted)] sm:flex-row">
+          <span>FDE 专用 AI 交付项目管理平台</span>
+          <span>DEEPSEEK · SUPABASE READY · VERCEL READY</span>
         </footer>
       </div>
+
       <Modal
         open={workspaceOpen}
         onClose={() => setWorkspaceOpen(false)}
         title="创建 Workspace"
-        description="不会载入任何示例项目或业务数据。"
+        description="建立企业 AI 项目的数据与权限边界。"
       >
         <form
           onSubmit={(event) => {
@@ -209,7 +268,11 @@ function Welcome() {
                 type="button"
                 key={String(item)}
                 onClick={() => setType(item as Workspace["type"])}
-                className={`grid place-items-center gap-2 border p-3 text-xs ${type === item ? "border-[#759d29] bg-[#f0f7e4] text-[#385c05] dark:bg-[#1d301b] dark:text-[#b8f34b]" : "border-[var(--line)]"}`}
+                className={`grid place-items-center gap-2 rounded-[var(--radius-md)] border p-3 text-xs transition ${
+                  type === item
+                    ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--primary-ink)]"
+                    : "border-[var(--line)] hover:border-[var(--primary-border)]"
+                }`}
               >
                 <Icon size={18} />
                 {String(item)}
@@ -230,8 +293,11 @@ function Welcome() {
               <option value="sg">新加坡</option>
             </Select>
           </Field>
-          <div className="flex items-start gap-3 bg-[#eef4f7] p-3 text-xs leading-5 text-[#58687b] dark:bg-[#13263a] dark:text-[#aab5c4]">
-            <ShieldCheck className="mt-0.5 shrink-0" size={16} />
+          <div className="flex items-start gap-3 rounded-[var(--radius-md)] bg-[var(--surface-subtle)] p-3 text-xs leading-5 text-[var(--muted)]">
+            <ShieldCheck
+              className="mt-0.5 shrink-0 text-[var(--primary)]"
+              size={16}
+            />
             本地模式只保存你主动创建的业务数据；可随时在侧栏清空。
           </div>
           <div className="flex justify-end gap-2">

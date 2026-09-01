@@ -115,7 +115,7 @@ export default function ReportsPage() {
           return (
             <section key={type} className="card flex min-h-72 flex-col p-5">
               <div className="flex items-start justify-between">
-                <span className="grid size-11 place-items-center bg-[#edf2f5] text-[#315d88] dark:bg-[#14283d] dark:text-[#91b9df]">
+                <span className="grid size-11 place-items-center rounded-[var(--radius-md)] bg-[var(--primary-soft)] text-[var(--primary)]">
                   <Icon size={20} />
                 </span>
                 {report && (
@@ -197,8 +197,8 @@ export default function ReportsPage() {
       >
         {preview && (
           <article className="text-sm leading-7">
-            <div className="border-b-4 border-[#0c1e3a] pb-6">
-              <p className="font-data text-[10px] font-bold uppercase tracking-[.2em] text-[#668c1e]">
+            <div className="border-b-4 border-[var(--primary)] pb-6">
+              <p className="font-data text-[10px] font-bold uppercase tracking-[.2em] text-[var(--primary)]">
                 FDE PORTAL · ACCEPTANCE EVIDENCE
               </p>
               <h1 className="mt-3 text-3xl font-bold">{state.project.name}</h1>
@@ -210,7 +210,7 @@ export default function ReportsPage() {
               <h2 className="mb-3 font-bold">01 · 项目目标</h2>
               <p>{state.project.goal}</p>
             </section>
-            <section className="grid gap-px border border-[var(--line)] bg-[var(--line)] sm:grid-cols-4">
+            <section className="grid gap-px overflow-hidden rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--line)] sm:grid-cols-4">
               {[
                 ["场景完整度", `${scenarioCompleteness}%`],
                 ["Eval通过率", `${latestRun?.successRate || 0}%`],
@@ -233,7 +233,7 @@ export default function ReportsPage() {
                   : "当前尚无 Eval Run，无法形成技术验收结论。"}
               </p>
             </section>
-            <section className="border-l-4 border-[#d47723] bg-[#fff7ec] p-4 dark:bg-[#2c2116]">
+            <section className="rounded-r-[var(--radius-md)] border-l-4 border-[var(--warning)] bg-[var(--warning-soft)] p-4">
               <b>生产决策建议</b>
               <p className="mt-1 text-xs text-[var(--muted)]">
                 仅在场景、Eval、证据和风险均达到项目验收标准后做生产决策。

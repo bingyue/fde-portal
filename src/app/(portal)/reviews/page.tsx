@@ -65,9 +65,9 @@ export default function ReviewsPage() {
                 <button
                   key={review.id}
                   onClick={() => setActive(review)}
-                  className="flex w-full flex-col gap-3 border border-[var(--line)] p-4 text-left transition hover:border-[#8fae52] sm:flex-row sm:items-center"
+                  className="flex w-full flex-col gap-3 rounded-[var(--radius-md)] border border-[var(--line)] p-4 text-left transition hover:border-[var(--primary-border)] hover:bg-[var(--surface-subtle)] sm:flex-row sm:items-center"
                 >
-                  <span className="grid size-10 shrink-0 place-items-center bg-[#edf2f5] text-[#315d88] dark:bg-[#14283d]">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-[var(--radius-md)] bg-[var(--primary-soft)] text-[var(--primary)]">
                     <MessageSquareText size={17} />
                   </span>
                   <div className="flex-1">
@@ -131,8 +131,8 @@ export default function ReviewsPage() {
               </div>
             </div>
           </section>
-          <section className="border border-[#b5ce7d] bg-[#f2f8e7] p-5 dark:bg-[#172b18]">
-            <div className="flex items-center gap-2 text-[#527411] dark:text-[#b8f34b]">
+          <section className="rounded-[var(--radius-md)] border border-[var(--primary-border)] bg-[var(--primary-soft)] p-5">
+            <div className="flex items-center gap-2 text-[var(--primary-ink)]">
               <ShieldCheck size={16} />
               <b className="text-xs">评审原则</b>
             </div>
@@ -155,7 +155,7 @@ export default function ReviewsPage() {
       >
         {active && (
           <div>
-            <div className="grid grid-cols-2 gap-px border border-[var(--line)] bg-[var(--line)]">
+            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--line)]">
               <div className="bg-[var(--surface)] p-3">
                 <span className="text-[10px] text-[var(--muted)]">
                   证据覆盖

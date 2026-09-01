@@ -1,6 +1,6 @@
 # FDE Portal
 
-面向 FDE 课程实训与企业 AI 项目的 POC、Eval 和验收工作台。MVP 已实现“创建项目 → 场景卡 → POC → Eval → AI 资产 → 评审 → 验收报告”的可演示纵向闭环。
+FDE 专用的 AI 交付项目管理平台，统一管理企业 AI 项目的需求澄清、POC、Eval、风险、评审与验收。当前版本已实现“创建项目 → 场景卡 → POC → Eval → AI 资产 → 评审 → 验收报告”的完整纵向闭环。
 
 ## 快速开始
 
@@ -24,7 +24,8 @@ npm run dev
 - 10 类 AI 资产元数据、版本、权限、评测结果和复用标记
 - 场景卡/Eval/阶段/验收评审，通过、退回、有条件通过
 - POC 立项书、Eval 评测报告、POC 验收报告；在线预览、业务确认、HTML 导出与打印 PDF
-- 响应式侧栏、移动端导航、键盘焦点、Loading、Empty、校验、确认和深色模式
+- 商务蓝 SaaS 设计系统、全浅色工作台，以及浅色/深色/跟随系统三态主题
+- 响应式侧栏、移动端导航、键盘焦点、减少动画偏好、Loading、Empty、校验和确认
 - 真实数据模式本地持久化；DeepSeek 服务端连接测试与安全密钥配置
 - 从 `bingyue/fde-skills` 初始化 65 个 Skill、12 个分类和版本化清单
 - Skill 搜索、详情、65 个独立 ZIP 下载与完整仓库下载
@@ -47,7 +48,7 @@ src/
     (portal)/              # 工作台与项目页面，共享应用壳
     api/ai/                # 服务端 AI Provider 与安全配置
     api/skills/tasks/      # Skill 后台任务与状态查询
-  components/              # 企业级 UI 基础组件与 AppShell
+  components/              # 企业级 UI、主题基础设施与 AppShell
   lib/
     ai/                    # Provider、Schema、10 个独立 Skill
     metrics.ts             # 核心指标计算
@@ -57,7 +58,7 @@ src/
 supabase/
   migrations/              # 18 个核心实体、索引、RLS、审计、Storage
   seed.sql                 # 故意留空，不写入业务样例
-tests/e2e/                 # POC 端到端闭环
+tests/e2e/                 # POC、Skill 与主题端到端测试
 public/skill-downloads/    # 65 个可下载 Skill ZIP
 scripts/sync-fde-skills.mjs # GitHub 仓库同步与打包器
 ```

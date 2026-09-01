@@ -186,7 +186,7 @@ export default function ScenarioPage() {
           </>
         }
       />
-      <div className="mb-6 grid gap-4 border border-[var(--line)] bg-[var(--surface)] p-5 md:grid-cols-[1fr_auto_auto]">
+      <div className="mb-6 grid gap-4 rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[var(--shadow)] md:grid-cols-[1fr_auto_auto]">
         <div>
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-bold">{state.scenario.name}</h2>
@@ -226,7 +226,7 @@ export default function ScenarioPage() {
         </div>
       </div>
       {issuesOpen && (
-        <div className="mb-6 border-l-4 border-[#b8f34b] bg-[#f3f8e8] p-4 text-sm dark:bg-[#182c19]">
+        <div className="mb-6 rounded-r-[var(--radius-md)] border-l-4 border-[var(--primary)] bg-[var(--primary-soft)] p-4 text-sm">
           <b>完整性检查：当前得分 {completeness}%</b>
           <p className="mt-1 text-xs text-[var(--muted)]">
             建议补充“下游系统”和“数据更新频率”；当前业务基线、风险边界和验收阈值已完整。
@@ -343,11 +343,11 @@ export default function ScenarioPage() {
       >
         {!preview ? (
           <div>
-            <div className="mb-5 flex items-center justify-between border border-[var(--line)] bg-[#f7f9fa] p-3 text-xs dark:bg-[#101f31]">
+            <div className="mb-5 flex items-center justify-between rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface-subtle)] p-3 text-xs">
               <span>
                 <b>访谈进度</b> · 10 个核心问题
               </span>
-              <span className="font-data font-bold text-[#668c1e]">
+              <span className="font-data font-bold text-[var(--primary)]">
                 {answeredCount} / 10
               </span>
             </div>
@@ -373,7 +373,7 @@ export default function ScenarioPage() {
             {aiError && (
               <div
                 role="alert"
-                className="mt-4 border border-[#e0a19d] bg-[#fff2f0] p-3 text-xs text-[#a73732] dark:bg-[#351f20] dark:text-[#f09a95]"
+                className="mt-4 rounded-[var(--radius-md)] border border-[var(--danger-border)] bg-[var(--danger-soft)] p-3 text-xs text-[var(--danger)]"
               >
                 {aiError}
               </div>
@@ -399,8 +399,11 @@ export default function ScenarioPage() {
           </div>
         ) : (
           <div>
-            <div className="mb-5 flex items-start gap-3 border border-[#b8cf83] bg-[#f2f8e8] p-4 text-xs dark:bg-[#182c19]">
-              <CheckCircle2 size={18} className="shrink-0 text-[#668c1e]" />
+            <div className="mb-5 flex items-start gap-3 rounded-[var(--radius-md)] border border-[var(--primary-border)] bg-[var(--primary-soft)] p-4 text-xs">
+              <CheckCircle2
+                size={18}
+                className="shrink-0 text-[var(--primary)]"
+              />
               <span>
                 <b className="block">结构化输出已通过 Zod 校验</b>
                 <span className="mt-1 block text-[var(--muted)]">
@@ -408,7 +411,7 @@ export default function ScenarioPage() {
                 </span>
               </span>
             </div>
-            <div className="grid gap-px border border-[var(--line)] bg-[var(--line)] sm:grid-cols-2">
+            <div className="grid gap-px overflow-hidden rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--line)] sm:grid-cols-2">
               {Object.entries(preview).map(([key, value]) => (
                 <div key={key} className="bg-[var(--surface)] p-3">
                   <span className="font-data text-[9px] font-bold uppercase text-[var(--muted)]">

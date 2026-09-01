@@ -127,7 +127,7 @@ export default function ProjectOverview() {
           </>
         }
       />
-      <section className="mb-6 grid gap-px border border-[var(--line)] bg-[var(--line)] sm:grid-cols-2 xl:grid-cols-6">
+      <section className="mb-6 grid gap-px overflow-hidden rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--line)] sm:grid-cols-2 xl:grid-cols-6">
         {metrics.map(([label, value, hint, Icon, progress]) => (
           <div key={label} className="bg-[var(--surface)] p-4">
             <div className="mb-5 flex items-center justify-between text-[var(--muted)]">
@@ -150,7 +150,7 @@ export default function ProjectOverview() {
           action={
             <Link
               href="/project/poc"
-              className="text-xs font-bold text-[#567c13]"
+              className="text-xs font-bold text-[var(--primary)]"
             >
               进入工作台 →
             </Link>
@@ -165,11 +165,11 @@ export default function ProjectOverview() {
               <Link
                 href="/project/poc"
                 key={stage.id}
-                className="border border-[var(--line)] bg-[var(--surface)] p-4 transition hover:-translate-y-0.5 hover:border-[#9dbb61]"
+                className="rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface)] p-4 transition hover:-translate-y-0.5 hover:border-[var(--primary-border)] hover:shadow-[var(--shadow)]"
               >
                 <div className="mb-8 flex items-center justify-between">
                   <span
-                    className={`font-data grid size-7 place-items-center text-[10px] font-extrabold ${stage.status === "已通过" ? "bg-[#b8f34b] text-[#10223e]" : "bg-[#edf1f4] text-[#738093] dark:bg-[#15273b]"}`}
+                    className={`font-data grid size-7 place-items-center rounded-[var(--radius-sm)] text-[10px] font-extrabold ${stage.status === "已通过" ? "bg-[var(--success)] text-white" : "bg-[var(--surface-hover)] text-[var(--muted)]"}`}
                   >
                     {stage.status === "已通过" ? (
                       <Check size={13} />
@@ -223,8 +223,8 @@ export default function ProjectOverview() {
           )}
         </section>
         <aside className="space-y-6">
-          <section className="border border-[#b5ce7d] bg-[#f2f8e7] p-5 dark:border-[#486824] dark:bg-[#172b18]">
-            <div className="flex items-center gap-2 text-[#527411] dark:text-[#b8f34b]">
+          <section className="rounded-[var(--radius-md)] border border-[var(--primary-border)] bg-[var(--primary-soft)] p-5">
+            <div className="flex items-center gap-2 text-[var(--primary-ink)]">
               <Sparkles size={16} />
               <b>下一步建议</b>
             </div>

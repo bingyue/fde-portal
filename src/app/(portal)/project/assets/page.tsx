@@ -53,7 +53,7 @@ export default function AssetsPage() {
         {["全部资产", ...types.slice(0, 6)].map((item, index) => (
           <button
             key={item}
-            className={`border px-3 py-2 text-xs ${index === 0 ? "border-[#769d2d] bg-[#f2f8e8] text-[#527411] dark:bg-[#1a301b] dark:text-[#b8f34b]" : "border-[var(--line)] bg-[var(--surface)] text-[var(--muted)]"}`}
+            className={`rounded-[var(--radius-sm)] border px-3 py-2 text-xs ${index === 0 ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--primary-ink)]" : "border-[var(--line)] bg-[var(--surface)] text-[var(--muted)]"}`}
           >
             {item}
           </button>
@@ -63,7 +63,7 @@ export default function AssetsPage() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[920px] text-left">
             <thead>
-              <tr className="border-b border-[var(--line)] bg-[#f7f9fa] text-[10px] uppercase tracking-wider text-[var(--muted)] dark:bg-[#101f31]">
+              <tr className="border-b border-[var(--line)] bg-[var(--surface-subtle)] text-[10px] uppercase tracking-wider text-[var(--muted)]">
                 <th className="p-4">资产</th>
                 <th className="p-4">版本 / 负责人</th>
                 <th className="p-4">权限</th>
@@ -81,7 +81,7 @@ export default function AssetsPage() {
                 >
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <span className="grid size-9 place-items-center bg-[#edf2f5] text-[#355b80] dark:bg-[#14283d] dark:text-[#91b9df]">
+                      <span className="grid size-9 place-items-center rounded-[var(--radius-md)] bg-[var(--primary-soft)] text-[var(--primary)]">
                         <Box size={16} />
                       </span>
                       <div>
@@ -124,7 +124,7 @@ export default function AssetsPage() {
                   </td>
                   <td className="p-4">
                     {asset.reusable ? (
-                      <span className="inline-flex items-center gap-1 text-xs text-[#087d5d]">
+                      <span className="inline-flex items-center gap-1 text-xs text-[var(--success)]">
                         <Recycle size={13} />
                         允许
                       </span>

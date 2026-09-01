@@ -47,7 +47,7 @@ export default function TeamPage() {
             <SectionTitle title="当前 Workspace" />
             <div className="border border-[var(--line)] p-4">
               <div className="flex items-center gap-3">
-                <span className="grid size-10 place-items-center bg-[#0c1e3a] text-[#b8f34b]">
+                <span className="grid size-10 place-items-center rounded-[var(--radius-md)] bg-[var(--primary)] text-white dark:text-[#071426]">
                   <Building2 size={18} />
                 </span>
                 <div>
@@ -72,7 +72,7 @@ export default function TeamPage() {
                 </div>
               </div>
             </div>
-            <div className="mt-5 flex items-start gap-3 bg-[#eef4f7] p-3 text-xs leading-5 text-[var(--muted)] dark:bg-[#13263a]">
+            <div className="mt-5 flex items-start gap-3 rounded-[var(--radius-md)] bg-[var(--surface-subtle)] p-3 text-xs leading-5 text-[var(--muted)]">
               <ShieldCheck size={16} className="mt-0.5 shrink-0" />
               生产环境由 Supabase Auth 与 workspace_id RLS 策略隔离。
             </div>
@@ -89,7 +89,7 @@ export default function TeamPage() {
               }
             />
             <div className="flex items-center gap-4 border-y border-[var(--line)] py-4">
-              <span className="grid size-9 place-items-center bg-[#edf2f5] text-[#315d88] dark:bg-[#14283d]">
+              <span className="grid size-9 place-items-center bg-[var(--primary-soft)] text-[var(--primary)]">
                 <UserRoundCog size={16} />
               </span>
               <div className="flex-1">

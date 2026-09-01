@@ -70,7 +70,7 @@ export default function DashboardPage() {
         />
         <div className="mb-6 grid gap-4 md:grid-cols-3">
           <div className="card p-5">
-            <span className="grid size-10 place-items-center bg-[#e5f6ef] text-[#087d5d] dark:bg-[#103529]">
+            <span className="grid size-10 place-items-center rounded-[var(--radius-md)] bg-[var(--success-soft)] text-[var(--success)]">
               <CheckCircle2 size={18} />
             </span>
             <b className="mt-5 block">Workspace</b>
@@ -83,10 +83,10 @@ export default function DashboardPage() {
           </div>
           <Link
             href="/settings/ai"
-            className="card group p-5 transition hover:border-[#9dbb61]"
+            className="card group p-5 transition hover:border-[var(--primary-border)]"
           >
             <span
-              className={`grid size-10 place-items-center ${aiConfigured ? "bg-[#e5f6ef] text-[#087d5d] dark:bg-[#103529]" : "bg-[#fff0dd] text-[#bd6414] dark:bg-[#3a2815]"}`}
+              className={`grid size-10 place-items-center rounded-[var(--radius-md)] ${aiConfigured ? "bg-[var(--success-soft)] text-[var(--success)]" : "bg-[var(--warning-soft)] text-[var(--warning)]"}`}
             >
               <KeyRound size={18} />
             </span>
@@ -100,16 +100,16 @@ export default function DashboardPage() {
           </Link>
           <Link
             href="/projects/new"
-            className="card group p-5 transition hover:border-[#9dbb61]"
+            className="card group p-5 transition hover:border-[var(--primary-border)]"
           >
-            <span className="grid size-10 place-items-center bg-[#edf2f5] text-[#315d88] dark:bg-[#14283d]">
+            <span className="grid size-10 place-items-center rounded-[var(--radius-md)] bg-[var(--primary-soft)] text-[var(--primary)]">
               <BriefcaseBusiness size={18} />
             </span>
             <b className="mt-5 block">第一个项目</b>
             <p className="mt-1 text-xs text-[var(--muted)]">
               从空白业务目标与场景卡开始
             </p>
-            <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#567c13]">
+            <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[var(--primary)]">
               创建项目 <ArrowRight size={12} />
             </span>
           </Link>
@@ -177,7 +177,7 @@ export default function DashboardPage() {
           ],
         ].map(([Icon, value, label, tone]) => (
           <div key={String(label)} className="card flex items-center gap-4 p-5">
-            <span className="grid size-11 place-items-center bg-[#edf2f5] text-[#315d88] dark:bg-[#14283d]">
+            <span className="grid size-11 place-items-center rounded-[var(--radius-md)] bg-[var(--primary-soft)] text-[var(--primary)]">
               <Icon size={20} />
             </span>
             <div className="flex-1">
@@ -198,7 +198,7 @@ export default function DashboardPage() {
             action={
               <Link
                 href="/project/overview"
-                className="text-xs font-semibold text-[#567c13]"
+                className="text-xs font-semibold text-[var(--primary)]"
               >
                 进入项目 →
               </Link>

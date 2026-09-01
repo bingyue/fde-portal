@@ -188,7 +188,7 @@ export default function EvalsPage() {
           <button
             key={item.id}
             onClick={() => setSelectedId(item.id)}
-            className={`min-w-52 border px-4 py-3 text-left ${item.id === suite?.id ? "border-[#769d2d] bg-[#f2f8e8] dark:bg-[#1a301b]" : "border-[var(--line)] bg-[var(--surface)]"}`}
+            className={`min-w-52 rounded-[var(--radius-md)] border px-4 py-3 text-left ${item.id === suite?.id ? "border-[var(--primary)] bg-[var(--primary-soft)]" : "border-[var(--line)] bg-[var(--surface)]"}`}
           >
             <div className="flex items-center justify-between">
               <b className="truncate text-xs">{item.name}</b>
@@ -248,7 +248,7 @@ export default function EvalsPage() {
                         type="monotone"
                         dataKey="successRate"
                         name="任务成功率"
-                        stroke="#159a74"
+                        stroke="var(--success)"
                         strokeWidth={2.5}
                         dot={{ r: 4 }}
                       />
@@ -256,7 +256,7 @@ export default function EvalsPage() {
                         type="monotone"
                         dataKey="takeoverRate"
                         name="人工接管率"
-                        stroke="#d47723"
+                        stroke="var(--warning)"
                         strokeWidth={2}
                         dot={{ r: 3 }}
                       />
@@ -337,7 +337,7 @@ export default function EvalsPage() {
               title="Eval Cases"
               meta={`${cases.length} 条真实案例`}
               action={
-                <label className="inline-flex cursor-pointer items-center gap-2 border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-xs font-semibold hover:border-[#8fae52]">
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-[var(--radius-sm)] border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-xs font-semibold hover:border-[var(--primary-border)]">
                   <Upload size={13} />
                   导入 CSV
                   <input
@@ -360,7 +360,7 @@ export default function EvalsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[900px] text-left">
                   <thead>
-                    <tr className="border-y border-[var(--line)] bg-[#f7f9fa] text-[10px] uppercase text-[var(--muted)] dark:bg-[#101f31]">
+                    <tr className="border-y border-[var(--line)] bg-[var(--surface-subtle)] text-[10px] uppercase text-[var(--muted)]">
                       <th className="p-3">Case</th>
                       <th className="p-3">输入</th>
                       <th className="p-3">期望结果</th>
