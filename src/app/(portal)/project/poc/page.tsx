@@ -20,9 +20,16 @@ import {
   Modal,
   PageHeader,
   Progress,
+  Select,
   SectionTitle,
 } from "@/components/ui";
+import {
+  getMissingEvidenceDimensions,
+  getRequiredEvidenceDimensions,
+  isEvidenceGateReady,
+} from "@/lib/delivery-model";
 import { usePortal } from "@/lib/store";
+import type { EvidenceDimension } from "@/lib/types";
 
 export default function PocPage() {
   const {
@@ -40,15 +47,15 @@ export default function PocPage() {
   );
   const [criterionOpen, setCriterionOpen] = useState(false);
   const [criterionTitle, setCriterionTitle] = useState("");
+  const [criterionDimension, setCriterionDimension] =
+    useState<EvidenceDimension>("技术");
   const stage =
     state.stages.find((item) => item.id === selectedId) || state.stages[0];
   if (!stage) return null;
   const risk = state.risks.find((item) => item.level === "高");
-  const canSubmit =
-    stage.criteriaTotal > 0 &&
-    stage.blockers.length === 0 &&
-    stage.criteriaPassed === stage.criteriaTotal &&
-    stage.evidenceCount >= stage.criteriaTotal;
+  const requiredDimensions = getRequiredEvidenceDimensions(stage.code);
+  const missingDimensions = getMissingEvidenceDimensions(stage);
+  const canSubmit = isEvidenceGateReady(stage);
   return (
     <div className="animate-rise">
       <PageHeader
@@ -58,7 +65,7 @@ export default function PocPage() {
         actions={
           <Button
             onClick={() => submitStageReview(stage.id)}
-            disabled={stage.status === "已通过"}
+            disabled={stage.status === "已通过" || !canSubmit}
           >
             {stage.status === "已通过" ? (
               <>
@@ -164,7 +171,10 @@ export default function PocPage() {
                 <div className="flex gap-2">
                   <Button
                     variant="secondary"
-                    onClick={() => setCriterionOpen(true)}
+                    onClick={() => {
+                      setCriterionDimension(requiredDimensions[0]);
+                      setCriterionOpen(true);
+                    }}
                   >
                     <Plus size={14} />
                     创建验收项
@@ -188,7 +198,7 @@ export default function PocPage() {
                 return (
                   <div
                     key={index}
-                    className="grid items-center gap-3 border-t border-[var(--line)] py-3.5 sm:grid-cols-[24px_1fr_auto_auto]"
+                    className="grid items-center gap-3 border-t border-[var(--line)] py-3.5 sm:grid-cols-[24px_1fr_auto_auto_auto]"
                   >
                     <button
                       type="button"
@@ -203,6 +213,17 @@ export default function PocPage() {
                     <span className="text-xs font-semibold">
                       {criterion?.title || `验收项 ${index + 1}`}
                     </span>
+                    <Badge
+                      tone={
+                        criterion?.dimension === "技术"
+                          ? "info"
+                          : criterion?.dimension === "业务"
+                            ? "success"
+                            : "warning"
+                      }
+                    >
+                      {criterion?.dimension || "技术"}证据
+                    </Badge>
                     <Badge tone={hasEvidence ? "success" : "warning"}>
                       {hasEvidence ? "已绑定证据" : "缺少证据"}
                     </Badge>
@@ -260,6 +281,10 @@ export default function PocPage() {
               ["验收项全部通过", stage.criteriaPassed === stage.criteriaTotal],
               ["有效证据覆盖完整", stage.evidenceCount >= stage.criteriaTotal],
               [
+                `阶段证据维度：${requiredDimensions.join("、")}`,
+                missingDimensions.length === 0,
+              ],
+              [
                 "无开放高风险",
                 !state.risks.some(
                   (item) => item.level === "高" && item.status !== "已关闭",
@@ -290,9 +315,9 @@ export default function PocPage() {
             <Button
               className="mt-4 w-full"
               onClick={() => submitStageReview(stage.id)}
-              disabled={stage.status === "已通过"}
+              disabled={stage.status === "已通过" || !canSubmit}
             >
-              {canSubmit ? "提交阶段门禁" : "尝试提交并查看缺失项"}
+              {canSubmit ? "提交阶段门禁" : "补齐条件后提交"}
             </Button>
           </section>
           {stage.blockers.length > 0 && (
@@ -319,7 +344,11 @@ export default function PocPage() {
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            addAcceptanceCriterion(stage.id, criterionTitle);
+            addAcceptanceCriterion(
+              stage.id,
+              criterionTitle,
+              criterionDimension,
+            );
             setCriterionTitle("");
             setCriterionOpen(false);
           }}
@@ -332,6 +361,22 @@ export default function PocPage() {
               onChange={(event) => setCriterionTitle(event.target.value)}
               placeholder="例如：核心任务成功率达到 85%"
             />
+          </Field>
+          <Field
+            label="证据维度"
+            hint={`当前阶段要求：${requiredDimensions.join("、")}`}
+          >
+            <Select
+              aria-label="证据维度"
+              value={criterionDimension}
+              onChange={(event) =>
+                setCriterionDimension(event.target.value as EvidenceDimension)
+              }
+            >
+              <option>技术</option>
+              <option>业务</option>
+              <option>采纳</option>
+            </Select>
           </Field>
           <div className="flex justify-end gap-2">
             <Button

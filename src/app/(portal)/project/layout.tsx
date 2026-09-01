@@ -22,7 +22,7 @@ export default function ProjectLayout({
         <EmptyState
           icon={<BriefcaseBusiness size={20} />}
           title="项目空间为空"
-          description="创建项目后即可使用场景卡、POC、Eval、资产和报告。"
+          description="创建项目后即可使用结果契约、现场发现、假设实验、证据门禁、采纳运营和能力沉淀。"
           action={
             <Link href="/projects/new">
               <Button>创建项目</Button>

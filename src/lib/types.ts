@@ -1,6 +1,7 @@
 export type StageStatus =
   "未开始" | "进行中" | "存在风险" | "待评审" | "已通过" | "未通过";
 export type RiskLevel = "低" | "中" | "高";
+export type EvidenceDimension = "技术" | "业务" | "采纳";
 
 export interface Workspace {
   id: string;
@@ -72,7 +73,80 @@ export interface PocStage {
   criteriaPassed: number;
   evidenceCount: number;
   blockers: string[];
-  criteria?: Array<{ id: string; title: string; passed: boolean }>;
+  criteria?: AcceptanceCriterion[];
+}
+
+export interface AcceptanceCriterion {
+  id: string;
+  title: string;
+  dimension: EvidenceDimension;
+  passed: boolean;
+}
+
+export interface OutcomeContract {
+  sponsor: string;
+  metricName: string;
+  baselineValue: string;
+  targetValue: string;
+  unit: string;
+  annualValue: number;
+  annualCost: number;
+  valueFormula: string;
+  successCondition: string;
+  stopCondition: string;
+  riskLevel: RiskLevel;
+  status: "草稿" | "已确认";
+}
+
+export interface Stakeholder {
+  id: string;
+  name: string;
+  role: string;
+  level: "战略层" | "运营层" | "执行层";
+  stance: "推动" | "中立" | "阻碍";
+}
+
+export interface WorkflowStep {
+  id: string;
+  name: string;
+  owner: string;
+  mode: "人工处理" | "AI建议" | "人工确认" | "自动执行";
+  system: string;
+  outcome: string;
+}
+
+export interface Hypothesis {
+  id: string;
+  title: string;
+  dimension: EvidenceDimension;
+  uncertainty: RiskLevel;
+  experiment: string;
+  threshold: string;
+  owner: string;
+  evidence: string;
+  status: "待验证" | "实验中" | "已验证" | "已否定";
+}
+
+export interface OperatingChecklistItem {
+  id: string;
+  title: string;
+  owner: string;
+  completed: boolean;
+}
+
+export interface AdoptionPlan {
+  champion: string;
+  targetUsers: number;
+  activeUsers: number;
+  items: OperatingChecklistItem[];
+}
+
+export interface ProductionProfile {
+  automationLevel: "AI建议" | "人工确认" | "异常确认" | "自动执行";
+  availabilityTarget: string;
+  taskCostBudget: number;
+  rollbackOwner: string;
+  items: OperatingChecklistItem[];
 }
 
 export interface EvalRun {
@@ -169,6 +243,12 @@ export interface Activity {
 export interface PortalState {
   workspace: Workspace;
   project: Project;
+  outcomeContract: OutcomeContract;
+  stakeholders: Stakeholder[];
+  workflowSteps: WorkflowStep[];
+  hypotheses: Hypothesis[];
+  adoptionPlan: AdoptionPlan;
+  productionProfile: ProductionProfile;
   scenario: ScenarioCard;
   stages: PocStage[];
   evalSuites: EvalSuite[];

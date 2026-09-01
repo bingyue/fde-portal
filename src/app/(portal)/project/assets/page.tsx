@@ -1,6 +1,13 @@
 "use client";
 
-import { Box, ExternalLink, Plus, Recycle, ShieldCheck } from "lucide-react";
+import {
+  ArrowRight,
+  Box,
+  ExternalLink,
+  Plus,
+  Recycle,
+  ShieldCheck,
+} from "lucide-react";
 import { useState } from "react";
 import {
   Badge,
@@ -9,8 +16,11 @@ import {
   Input,
   Modal,
   PageHeader,
+  Progress,
   Select,
+  SectionTitle,
 } from "@/components/ui";
+import { calculateChecklistProgress } from "@/lib/metrics";
 import { usePortal } from "@/lib/store";
 import type { Asset } from "@/lib/types";
 
@@ -28,7 +38,7 @@ const types: Asset["type"][] = [
 ];
 
 export default function AssetsPage() {
-  const { state, addAsset } = usePortal();
+  const { state, addAsset, promoteAsset } = usePortal();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<{
     name: string;
@@ -36,6 +46,11 @@ export default function AssetsPage() {
     version: string;
     permission: string;
   }>({ name: "", type: "Skill", version: "v0.1", permission: "项目成员" });
+  const reusableCount = state.assets.filter((asset) => asset.reusable).length;
+  const reuseRate = calculateChecklistProgress(
+    reusableCount,
+    state.assets.length,
+  );
   return (
     <div className="animate-rise">
       <PageHeader
@@ -49,6 +64,49 @@ export default function AssetsPage() {
           </Button>
         }
       />
+      <section className="mb-6 overflow-hidden rounded-[var(--radius-md)] border border-[var(--primary-border)] bg-[var(--surface)] shadow-[var(--shadow)]">
+        <div className="grid gap-px bg-[var(--line)] sm:grid-cols-[.75fr_1.25fr]">
+          <div className="bg-[var(--primary-soft)] p-5 sm:p-6">
+            <span className="text-[10px] font-bold uppercase tracking-[.14em] text-[var(--primary)]">
+              Productization Flywheel
+            </span>
+            <b className="font-data mt-4 block text-3xl">{reuseRate}%</b>
+            <p className="mt-1 text-xs text-[var(--muted)]">
+              可复用资产比例 · {reusableCount}/{state.assets.length || 0}
+            </p>
+            <div className="mt-5">
+              <Progress value={reuseRate} />
+            </div>
+          </div>
+          <div className="bg-[var(--surface)] p-5 sm:p-6">
+            <SectionTitle
+              title="从现场交付到组织杠杆"
+              meta="第二次交付应该明显更快、更便宜"
+            />
+            <div className="grid gap-2 sm:grid-cols-4">
+              {["现场经验", "方案沉淀", "平台能力", "下一项目复用"].map(
+                (item, index) => (
+                  <div
+                    key={item}
+                    className="flex items-center gap-2 rounded-[var(--radius-sm)] border border-[var(--line)] bg-[var(--surface-subtle)] px-3 py-3"
+                  >
+                    <span className="font-data grid size-6 shrink-0 place-items-center rounded-[var(--radius-sm)] bg-[var(--primary-soft)] text-[10px] font-black text-[var(--primary)]">
+                      {index + 1}
+                    </span>
+                    <b className="text-[11px]">{item}</b>
+                    {index < 3 && (
+                      <ArrowRight
+                        size={12}
+                        className="ml-auto text-[var(--muted)] max-sm:hidden"
+                      />
+                    )}
+                  </div>
+                ),
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
       <div className="mb-5 flex flex-wrap gap-2">
         {["全部资产", ...types.slice(0, 6)].map((item, index) => (
           <button
@@ -129,9 +187,12 @@ export default function AssetsPage() {
                         允许
                       </span>
                     ) : (
-                      <span className="text-xs text-[var(--muted)]">
-                        仅项目
-                      </span>
+                      <button
+                        onClick={() => promoteAsset(asset.id)}
+                        className="rounded-[var(--radius-sm)] border border-[var(--line-strong)] px-2 py-1.5 text-[11px] font-semibold text-[var(--primary)] transition hover:border-[var(--primary)] hover:bg-[var(--primary-soft)]"
+                      >
+                        沉淀复用
+                      </button>
                     )}
                   </td>
                   <td className="p-4">

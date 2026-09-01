@@ -41,6 +41,30 @@ export function calculateEvidenceCoverage(
   return Math.round((Math.max(0, withEvidence) / total) * 100);
 }
 
+export function calculateChecklistProgress(
+  completed: number,
+  total: number,
+): number {
+  if (total <= 0) return 0;
+  return Math.round((Math.max(0, completed) / total) * 100);
+}
+
+export function calculateAdoptionRate(
+  activeUsers: number,
+  targetUsers: number,
+): number {
+  if (targetUsers <= 0) return 0;
+  return Math.min(
+    100,
+    Math.round((Math.max(0, activeUsers) / targetUsers) * 100),
+  );
+}
+
+export function calculateRoi(annualValue: number, annualCost: number): number {
+  if (annualCost <= 0) return 0;
+  return Math.round(((annualValue - annualCost) / annualCost) * 100);
+}
+
 export function calculateUnitEffectiveCost(input: {
   modelCost: number;
   toolCost: number;

@@ -11,6 +11,8 @@ import {
   ListChecks,
   Sparkles,
   Target,
+  UsersRound,
+  Workflow,
 } from "lucide-react";
 import {
   Badge,
@@ -22,8 +24,11 @@ import {
 } from "@/components/ui";
 import { usePortal } from "@/lib/store";
 import {
+  calculateAdoptionRate,
+  calculateChecklistProgress,
   calculateEvidenceCoverage,
   calculateProjectRisk,
+  calculateRoi,
   calculateScenarioCompleteness,
 } from "@/lib/metrics";
 
@@ -72,6 +77,51 @@ export default function ProjectOverview() {
       total - state.stages.reduce((sum, item) => sum + item.criteriaPassed, 0),
     delayed: false,
   });
+  const hypothesisProgress = calculateChecklistProgress(
+    state.hypotheses.filter((item) => item.status === "已验证").length,
+    state.hypotheses.length,
+  );
+  const productionProgress = calculateChecklistProgress(
+    state.productionProfile.items.filter((item) => item.completed).length,
+    state.productionProfile.items.length,
+  );
+  const adoptionChecklist = calculateChecklistProgress(
+    state.adoptionPlan.items.filter((item) => item.completed).length,
+    state.adoptionPlan.items.length,
+  );
+  const adoptionRate = calculateAdoptionRate(
+    state.adoptionPlan.activeUsers,
+    state.adoptionPlan.targetUsers,
+  );
+  const stageProgress = calculateChecklistProgress(
+    state.stages.filter((item) => item.status === "已通过").length,
+    state.stages.length,
+  );
+  const technicalSpiral = Math.round(
+    completeness * 0.2 +
+      hypothesisProgress * 0.2 +
+      (latest ? 20 : 0) +
+      stageProgress * 0.2 +
+      productionProgress * 0.2,
+  );
+  const stakeholderCoverage = calculateChecklistProgress(
+    new Set(state.stakeholders.map((item) => item.level)).size,
+    3,
+  );
+  const organizationalSpiral = Math.round(
+    (state.outcomeContract.status === "已确认" ? 20 : 0) +
+      stakeholderCoverage * 0.2 +
+      Math.min(20, state.workflowSteps.length * 5) +
+      adoptionChecklist * 0.2 +
+      adoptionRate * 0.2,
+  );
+  const roi = calculateRoi(
+    state.outcomeContract.annualValue,
+    state.outcomeContract.annualCost,
+  );
+  const biggestUnknown = state.hypotheses.find(
+    (item) => item.uncertainty === "高" && item.status === "待验证",
+  );
   const metrics = [
     ["场景完整度", `${completeness}%`, "来自场景卡", Target, completeness],
     [
@@ -127,6 +177,57 @@ export default function ProjectOverview() {
           </>
         }
       />
+      <section className="mb-6 overflow-hidden rounded-[var(--radius-md)] border border-[var(--primary-border)] bg-[var(--surface)] shadow-[var(--shadow)]">
+        <div className="grid lg:grid-cols-[1fr_1fr_.8fr]">
+          <div className="border-b border-[var(--line)] p-5 lg:border-b-0 lg:border-r">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="grid size-9 place-items-center rounded-[var(--radius-md)] bg-[var(--primary-soft)] text-[var(--primary)]">
+                <Workflow size={17} />
+              </span>
+              <div>
+                <b className="text-sm">技术价值螺旋</b>
+                <p className="text-[10px] text-[var(--muted)]">
+                  发现 → 实验 → Eval → 生产
+                </p>
+              </div>
+              <b className="font-data ml-auto text-xl">{technicalSpiral}%</b>
+            </div>
+            <Progress value={technicalSpiral} />
+          </div>
+          <div className="border-b border-[var(--line)] p-5 lg:border-b-0 lg:border-r">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="grid size-9 place-items-center rounded-[var(--radius-md)] bg-[var(--success-soft)] text-[var(--success)]">
+                <UsersRound size={17} />
+              </span>
+              <div>
+                <b className="text-sm">组织采纳螺旋</b>
+                <p className="text-[10px] text-[var(--muted)]">
+                  共识 → 共创 → 采纳 → 制度化
+                </p>
+              </div>
+              <b className="font-data ml-auto text-xl">
+                {organizationalSpiral}%
+              </b>
+            </div>
+            <Progress value={organizationalSpiral} tone="success" />
+          </div>
+          <div className="bg-[var(--primary-soft)] p-5">
+            <span className="text-[10px] font-bold uppercase tracking-[.12em] text-[var(--primary)]">
+              当前最大不确定性
+            </span>
+            <p className="mt-3 text-xs font-semibold leading-5">
+              {biggestUnknown?.title ||
+                "尚未登记高不确定性假设，请先识别最可能让项目失败的未知条件。"}
+            </p>
+            <Link
+              href="/project/experiments"
+              className="mt-4 inline-block text-xs font-bold text-[var(--primary)]"
+            >
+              进入实验中心 →
+            </Link>
+          </div>
+        </div>
+      </section>
       <section className="mb-6 grid gap-px overflow-hidden rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--line)] sm:grid-cols-2 xl:grid-cols-6">
         {metrics.map(([label, value, hint, Icon, progress]) => (
           <div key={label} className="bg-[var(--surface)] p-4">
@@ -229,12 +330,23 @@ export default function ProjectOverview() {
               <b>下一步建议</b>
             </div>
             <p className="mt-3 text-sm leading-6">
-              {completeness < 80
-                ? "先完成场景卡的业务基线、数据来源和验收阈值，再设计 Eval。"
-                : !latest
-                  ? "场景信息已具备基础条件，可以创建第一套 Eval Suite。"
-                  : "根据最新 Eval 结果补齐证据并处理开放风险。"}
+              {state.outcomeContract.status !== "已确认"
+                ? "先确认结果契约，锁定基线、目标值、价值公式与停止条件。"
+                : biggestUnknown
+                  ? "优先验证当前高不确定性假设，不要用功能完成度掩盖未知风险。"
+                  : completeness < 80
+                    ? "补齐场景卡的数据来源、人机边界和验收阈值。"
+                    : !latest
+                      ? "场景信息已具备基础条件，可以创建第一套 Eval Suite。"
+                      : productionProgress < 100
+                        ? "技术证据已形成，下一步补齐采纳与生产就绪检查。"
+                        : "交付闭环已具备生产决策条件，准备结果验收与能力沉淀。"}
             </p>
+            {state.outcomeContract.annualCost > 0 && (
+              <p className="font-data mt-3 text-xs font-bold text-[var(--primary)]">
+                当前结果契约预期 ROI：{roi}%
+              </p>
+            )}
           </section>
           <section className="card p-5">
             <SectionTitle title="未关闭风险" meta={`${openRisks.length} 项`} />

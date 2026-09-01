@@ -9,9 +9,11 @@ import {
   CheckSquare2,
   ChevronDown,
   CircleUserRound,
+  Compass,
+  FileCheck2,
   FileText,
+  FlaskConical,
   Gauge,
-  GraduationCap,
   Home,
   KeyRound,
   Menu,
@@ -19,6 +21,7 @@ import {
   Settings2,
   ShieldCheck,
   Sparkles,
+  RadioTower,
   UsersRound,
   Workflow,
   X,
@@ -48,17 +51,29 @@ const capabilities = [
 
 const project = [
   ["/project/overview", "项目总览", Gauge],
+  ["/project/discovery", "结果与发现", Compass],
   ["/project/scenario", "场景卡", FileText],
-  ["/project/poc", "POC 工作台", Activity],
+  ["/project/experiments", "假设与实验", FlaskConical],
+  ["/project/poc", "证据门禁", Activity],
   ["/project/evals", "Eval 中心", ShieldCheck],
+  ["/project/operations", "采纳与运营", RadioTower],
   ["/project/assets", "AI 资产库", Sparkles],
-  ["/project/reports", "报告与验收", GraduationCap],
+  ["/project/reports", "报告与验收", FileCheck2],
 ] as const satisfies readonly NavItem[];
 
 function ShellContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { state, toast, clearLocalData } = usePortal();
+  const { state, toast, clearLocalData, hydrated } = usePortal();
   const [mobileOpen, setMobileOpen] = useState(false);
+  if (!hydrated)
+    return (
+      <div
+        role="status"
+        className="grid min-h-screen place-items-center bg-[var(--paper)] text-sm text-[var(--muted)]"
+      >
+        正在恢复交付工作区…
+      </div>
+    );
   const isProject = pathname.startsWith("/project/");
   const pendingReviews = state.reviews.filter(
     (item) => item.status === "待评审",

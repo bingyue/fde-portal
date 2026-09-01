@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  calculateAdoptionRate,
+  calculateChecklistProgress,
   calculateEvalPassRate,
   calculateEvidenceCoverage,
   calculateProjectRisk,
+  calculateRoi,
   calculateScenarioCompleteness,
   calculateUnitEffectiveCost,
 } from "./metrics";
@@ -24,6 +27,15 @@ describe("FDE 项目核心指标", () => {
   });
   it("计算证据覆盖率", () =>
     expect(calculateEvidenceCoverage(17, 23)).toBe(74));
+  it("计算组织采纳与检查清单进度", () => {
+    expect(calculateAdoptionRate(18, 24)).toBe(75);
+    expect(calculateAdoptionRate(30, 24)).toBe(100);
+    expect(calculateChecklistProgress(5, 8)).toBe(63);
+  });
+  it("计算年度 ROI 并处理零成本", () => {
+    expect(calculateRoi(300000, 100000)).toBe(200);
+    expect(calculateRoi(300000, 0)).toBe(0);
+  });
   it("计算单位有效结果成本", () =>
     expect(
       calculateUnitEffectiveCost({

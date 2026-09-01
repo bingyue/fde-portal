@@ -9,18 +9,29 @@ import {
   useState,
 } from "react";
 import type {
+  AdoptionPlan,
   Asset,
-  PortalState,
+  EvidenceDimension,
   EvalCase,
   EvalRun,
   EvalSuite,
+  Hypothesis,
+  OutcomeContract,
+  PortalState,
+  ProductionProfile,
   Project,
   Report,
   Review,
   ScenarioCard,
+  Stakeholder,
   Workspace,
+  WorkflowStep,
 } from "./types";
 import { blankScenario, createBlankStages, emptyState } from "./empty-state";
+import {
+  getMissingEvidenceDimensions,
+  isEvidenceGateReady,
+} from "./delivery-model";
 import { normalizePortalState } from "./state-migration";
 
 const STORAGE_KEY = "fde-portal-live-v2";
@@ -31,6 +42,22 @@ interface PortalContextValue {
   toast: string | null;
   createWorkspace: (workspace: Pick<Workspace, "name" | "type">) => void;
   createProject: (project: Partial<Project>) => void;
+  updateOutcomeContract: (
+    contract: Partial<OutcomeContract>,
+    confirm?: boolean,
+  ) => void;
+  addStakeholder: (stakeholder: Omit<Stakeholder, "id">) => void;
+  addWorkflowStep: (step: Omit<WorkflowStep, "id">) => void;
+  addHypothesis: (
+    hypothesis: Omit<Hypothesis, "id" | "status" | "evidence">,
+  ) => void;
+  updateHypothesis: (id: string, patch: Partial<Hypothesis>) => void;
+  updateAdoptionPlan: (plan: Partial<Omit<AdoptionPlan, "items">>) => void;
+  toggleAdoptionItem: (id: string) => void;
+  updateProductionProfile: (
+    profile: Partial<Omit<ProductionProfile, "items">>,
+  ) => void;
+  toggleProductionItem: (id: string) => void;
   updateScenario: (scenario: Partial<ScenarioCard>) => void;
   generateScenario: (
     answers: Record<string, string>,
@@ -38,7 +65,11 @@ interface PortalContextValue {
   confirmScenario: (preview: Partial<ScenarioCard>) => void;
   submitStageReview: (stageId: string) => void;
   attachEvidence: (stageId: string) => void;
-  addAcceptanceCriterion: (stageId: string, title: string) => void;
+  addAcceptanceCriterion: (
+    stageId: string,
+    title: string,
+    dimension: EvidenceDimension,
+  ) => void;
   toggleAcceptanceCriterion: (stageId: string, criterionId: string) => void;
   closeRisk: (riskId: string) => void;
   approveReview: (reviewId: string, status: Review["status"]) => void;
@@ -51,6 +82,7 @@ interface PortalContextValue {
   addAsset: (
     asset: Pick<Asset, "name" | "type" | "version" | "permission">,
   ) => void;
+  promoteAsset: (id: string) => void;
   generateReport: (type: Report["type"]) => void;
   confirmReport: (id: string) => void;
   clearLocalData: () => void;
@@ -128,6 +160,24 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
             id: projectId,
             updatedAt: "刚刚",
           },
+          outcomeContract: {
+            ...emptyState.outcomeContract,
+            sponsor: project.businessOwner || "",
+          },
+          stakeholders: [],
+          workflowSteps: [],
+          hypotheses: [],
+          adoptionPlan: {
+            ...emptyState.adoptionPlan,
+            items: emptyState.adoptionPlan.items.map((item) => ({ ...item })),
+          },
+          productionProfile: {
+            ...emptyState.productionProfile,
+            rollbackOwner: project.owner || "",
+            items: emptyState.productionProfile.items.map((item) => ({
+              ...item,
+            })),
+          },
           scenario: { ...blankScenario, id: uid("scenario") },
           stages: createBlankStages(),
           evalSuites: [],
@@ -144,6 +194,130 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
           activities: [activity(`创建项目「${project.name || "未命名项目"}」`)],
         }));
         notify("项目已创建，已进入场景澄清阶段");
+      },
+      updateOutcomeContract: (contract, confirm = false) => {
+        setState((old) => ({
+          ...old,
+          outcomeContract: {
+            ...old.outcomeContract,
+            ...contract,
+            status: confirm ? "已确认" : old.outcomeContract.status,
+          },
+          activities: [
+            activity(
+              confirm ? "确认结果契约" : "更新结果契约",
+              confirm ? "success" : "neutral",
+            ),
+            ...old.activities,
+          ],
+        }));
+        notify(confirm ? "结果契约已确认" : "结果契约已保存");
+      },
+      addStakeholder: (stakeholder) => {
+        setState((old) => ({
+          ...old,
+          stakeholders: [
+            ...old.stakeholders,
+            { ...stakeholder, id: uid("stakeholder") },
+          ],
+          activities: [
+            activity(`登记干系人「${stakeholder.name}」`, "neutral"),
+            ...old.activities,
+          ],
+        }));
+        notify("干系人已加入现场发现地图");
+      },
+      addWorkflowStep: (step) => {
+        setState((old) => ({
+          ...old,
+          workflowSteps: [
+            ...old.workflowSteps,
+            { ...step, id: uid("workflow") },
+          ],
+          activities: [
+            activity(`补充英雄工作流节点「${step.name}」`, "neutral"),
+            ...old.activities,
+          ],
+        }));
+        notify("业务闭环节点已添加");
+      },
+      addHypothesis: (hypothesis) => {
+        setState((old) => ({
+          ...old,
+          hypotheses: [
+            {
+              ...hypothesis,
+              id: uid("hypothesis"),
+              status: "待验证",
+              evidence: "",
+            },
+            ...old.hypotheses,
+          ],
+          activities: [
+            activity(`登记关键假设「${hypothesis.title}」`, "warning"),
+            ...old.activities,
+          ],
+        }));
+        notify("关键假设已登记");
+      },
+      updateHypothesis: (id, patch) => {
+        setState((old) => ({
+          ...old,
+          hypotheses: old.hypotheses.map((item) =>
+            item.id === id ? { ...item, ...patch } : item,
+          ),
+          activities: [
+            activity("更新假设实验结论", "neutral"),
+            ...old.activities,
+          ],
+        }));
+        notify("实验状态与证据已更新");
+      },
+      updateAdoptionPlan: (plan) => {
+        setState((old) => ({
+          ...old,
+          adoptionPlan: { ...old.adoptionPlan, ...plan },
+        }));
+        notify("采纳指标已更新");
+      },
+      toggleAdoptionItem: (id) => {
+        setState((old) => ({
+          ...old,
+          adoptionPlan: {
+            ...old.adoptionPlan,
+            items: old.adoptionPlan.items.map((item) =>
+              item.id === id ? { ...item, completed: !item.completed } : item,
+            ),
+          },
+          activities: [
+            activity("更新组织采纳计划", "neutral"),
+            ...old.activities,
+          ],
+        }));
+        notify("采纳计划已更新");
+      },
+      updateProductionProfile: (profile) => {
+        setState((old) => ({
+          ...old,
+          productionProfile: { ...old.productionProfile, ...profile },
+        }));
+        notify("生产运行边界已更新");
+      },
+      toggleProductionItem: (id) => {
+        setState((old) => ({
+          ...old,
+          productionProfile: {
+            ...old.productionProfile,
+            items: old.productionProfile.items.map((item) =>
+              item.id === id ? { ...item, completed: !item.completed } : item,
+            ),
+          },
+          activities: [
+            activity("更新生产就绪检查", "neutral"),
+            ...old.activities,
+          ],
+        }));
+        notify("生产就绪状态已更新");
       },
       updateScenario: (scenario) => {
         setState((old) => ({
@@ -196,8 +370,15 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
       submitStageReview: (stageId) => {
         setState((old) => {
           const stage = old.stages.find((item) => item.id === stageId);
-          if (!stage || stage.blockers.length > 0) {
-            notify("阶段仍有阻塞项，请先关闭风险并补齐证据");
+          if (!stage || !isEvidenceGateReady(stage)) {
+            const missingDimensions = stage
+              ? getMissingEvidenceDimensions(stage)
+              : [];
+            notify(
+              missingDimensions.length
+                ? `门禁缺少${missingDimensions.join("、")}证据`
+                : "阶段仍有阻塞项，请完成验收并补齐证据",
+            );
             return old;
           }
           return {
@@ -253,7 +434,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
         }));
         notify("证据已上传并完成有效性校验");
       },
-      addAcceptanceCriterion: (stageId, title) => {
+      addAcceptanceCriterion: (stageId, title, dimension) => {
         setState((old) => ({
           ...old,
           stages: old.stages.map((stage) =>
@@ -262,7 +443,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
                   ...stage,
                   criteria: [
                     ...(stage.criteria || []),
-                    { id: uid("criterion"), title, passed: false },
+                    { id: uid("criterion"), title, dimension, passed: false },
                   ],
                   criteriaTotal: stage.criteriaTotal + 1,
                 }
@@ -418,6 +599,21 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
           ],
         }));
         notify("AI 资产已登记");
+      },
+      promoteAsset: (id) => {
+        setState((old) => ({
+          ...old,
+          assets: old.assets.map((asset) =>
+            asset.id === id
+              ? { ...asset, reusable: true, status: "可复用" as const }
+              : asset,
+          ),
+          activities: [
+            activity("将项目资产沉淀为团队可复用能力"),
+            ...old.activities,
+          ],
+        }));
+        notify("资产已进入团队复用目录");
       },
       generateReport: (type) => {
         setState((old) => ({
