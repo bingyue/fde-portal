@@ -1,4 +1,4 @@
-import type { DemoState, PocStage, ScenarioCard } from "./types";
+import type { PortalState, PocStage, ScenarioCard } from "./types";
 
 export const blankScenario: ScenarioCard = {
   id: "",
@@ -62,7 +62,7 @@ export function createBlankStages(): PocStage[] {
   }));
 }
 
-export const emptyState: DemoState = {
+export const emptyState: PortalState = {
   workspace: {
     id: "",
     name: "尚未创建 Workspace",

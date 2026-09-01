@@ -10,7 +10,7 @@ import {
 } from "react";
 import type {
   Asset,
-  DemoState,
+  PortalState,
   EvalCase,
   EvalRun,
   EvalSuite,
@@ -21,12 +21,12 @@ import type {
   Workspace,
 } from "./types";
 import { blankScenario, createBlankStages, emptyState } from "./empty-state";
+import { normalizePortalState } from "./state-migration";
 
 const STORAGE_KEY = "fde-portal-live-v2";
-const LEGACY_DEMO_KEY = "fde-portal-demo-v1";
 
-interface DemoContextValue {
-  state: DemoState;
+interface PortalContextValue {
+  state: PortalState;
   hydrated: boolean;
   toast: string | null;
   createWorkspace: (workspace: Pick<Workspace, "name" | "type">) => void;
@@ -56,23 +56,22 @@ interface DemoContextValue {
   clearLocalData: () => void;
 }
 
-const DemoContext = createContext<DemoContextValue | null>(null);
+const PortalContext = createContext<PortalContextValue | null>(null);
 
 function uid(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
-export function DemoProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<DemoState>(emptyState);
+export function PortalProvider({ children }: { children: React.ReactNode }) {
+  const [state, setState] = useState<PortalState>(emptyState);
   const [hydrated, setHydrated] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
-    let savedState: DemoState | null = null;
+    let savedState: PortalState | null = null;
     try {
-      localStorage.removeItem(LEGACY_DEMO_KEY);
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) savedState = JSON.parse(saved) as DemoState;
+      if (saved) savedState = normalizePortalState(JSON.parse(saved));
     } catch {
       localStorage.removeItem(STORAGE_KEY);
     }
@@ -102,7 +101,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     tone,
   });
 
-  const value = useMemo<DemoContextValue>(
+  const value = useMemo<PortalContextValue>(
     () => ({
       state,
       hydrated,
@@ -451,7 +450,6 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       },
       clearLocalData: () => {
         localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem(LEGACY_DEMO_KEY);
         setState(emptyState);
         notify("本地业务数据已清空");
       },
@@ -459,11 +457,13 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     [state, hydrated, toast, notify],
   );
 
-  return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>;
+  return (
+    <PortalContext.Provider value={value}>{children}</PortalContext.Provider>
+  );
 }
 
-export function useDemo() {
-  const context = useContext(DemoContext);
-  if (!context) throw new Error("useDemo 必须在 DemoProvider 内使用");
+export function usePortal() {
+  const context = useContext(PortalContext);
+  if (!context) throw new Error("usePortal 必须在 PortalProvider 内使用");
   return context;
 }

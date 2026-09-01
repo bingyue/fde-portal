@@ -5,6 +5,7 @@ test("真实数据模式创建 Workspace 与首个项目", async ({ page }) => {
   await page
     .getByRole("button", { name: "创建 Workspace", exact: true })
     .click();
+  await expect(page.getByText("课程空间", { exact: true })).toHaveCount(0);
   await page.getByLabel("Workspace 名称").fill("E2E AI 交付中心");
   await page.getByRole("button", { name: "创建并进入", exact: true }).click();
   await expect(
@@ -12,6 +13,7 @@ test("真实数据模式创建 Workspace 与首个项目", async ({ page }) => {
   ).toBeVisible();
 
   await page.getByRole("button", { name: "创建项目", exact: true }).click();
+  await expect(page.getByText("课程实训项目", { exact: true })).toHaveCount(0);
   await page.getByLabel("项目名称").fill("电商智能客服 POC");
   await page.getByLabel("所属行业").selectOption({ label: "零售电商" });
   await page.getByLabel("企业或部门").fill("客户体验中心");

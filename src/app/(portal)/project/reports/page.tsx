@@ -19,7 +19,7 @@ import {
   Progress,
   SectionTitle,
 } from "@/components/ui";
-import { useDemo } from "@/lib/store";
+import { usePortal } from "@/lib/store";
 import type { Report } from "@/lib/types";
 import {
   calculateEvidenceCoverage,
@@ -42,7 +42,7 @@ const reportMeta: Record<
 };
 
 export default function ReportsPage() {
-  const { state, generateReport, confirmReport } = useDemo();
+  const { state, generateReport, confirmReport } = usePortal();
   const [preview, setPreview] = useState<Report | null>(null);
   const latestRun = state.evalSuites[0]?.runs.at(-1);
   const scenario = state.scenario;

@@ -5,14 +5,14 @@ export type RiskLevel = "低" | "中" | "高";
 export interface Workspace {
   id: string;
   name: string;
-  type: "课程空间" | "团队空间" | "企业空间";
+  type: "团队空间" | "企业空间";
   members: number;
 }
 
 export interface Project {
   id: string;
   name: string;
-  type: "课程实训项目" | "企业POC" | "内部AI创新项目";
+  type: "企业POC" | "内部AI创新项目";
   organization: string;
   industry: string;
   goal: string;
@@ -166,7 +166,7 @@ export interface Activity {
   tone: "neutral" | "success" | "warning";
 }
 
-export interface DemoState {
+export interface PortalState {
   workspace: Workspace;
   project: Project;
   scenario: ScenarioCard;

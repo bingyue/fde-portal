@@ -5,7 +5,6 @@ import {
   Building2,
   Check,
   CircleCheck,
-  GraduationCap,
   KeyRound,
   LockKeyhole,
   Plus,
@@ -17,7 +16,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ThemeSelector } from "@/components/theme-provider";
 import { Button, Field, Input, Modal, Select } from "@/components/ui";
-import { DemoProvider, useDemo } from "@/lib/store";
+import { PortalProvider, usePortal } from "@/lib/store";
 import type { Workspace } from "@/lib/types";
 
 const deliveryStages = [
@@ -31,7 +30,7 @@ const deliveryStages = [
 
 function Welcome() {
   const router = useRouter();
-  const { state, createWorkspace } = useDemo();
+  const { state, createWorkspace } = usePortal();
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const [name, setName] = useState("");
   const [type, setType] = useState<Workspace["type"]>("企业空间");
@@ -258,9 +257,8 @@ function Welcome() {
           }}
           className="grid gap-5"
         >
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {[
-              ["课程空间", GraduationCap],
               ["团队空间", UsersRound],
               ["企业空间", Building2],
             ].map(([item, Icon]) => (
@@ -320,8 +318,8 @@ function Welcome() {
 
 export default function Home() {
   return (
-    <DemoProvider>
+    <PortalProvider>
       <Welcome />
-    </DemoProvider>
+    </PortalProvider>
   );
 }

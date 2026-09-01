@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ArrowRight,
-  Building2,
-  FilePlus2,
-  GraduationCap,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, Building2, FilePlus2, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
@@ -18,11 +12,11 @@ import {
   Select,
   Textarea,
 } from "@/components/ui";
-import { useDemo } from "@/lib/store";
+import { usePortal } from "@/lib/store";
 import type { Project } from "@/lib/types";
 
 export default function NewProjectPage() {
-  const { createProject, state } = useDemo();
+  const { createProject, state } = usePortal();
   const router = useRouter();
   const [type, setType] = useState<Project["type"]>("企业POC");
   const [form, setForm] = useState({
@@ -76,7 +70,6 @@ export default function NewProjectPage() {
           <div className="grid gap-2">
             {[
               ["企业POC", Building2, "真实企业场景，业务负责人参与验收"],
-              ["课程实训项目", GraduationCap, "导师门禁与学员作品集"],
               ["内部AI创新项目", Sparkles, "团队内部效率和能力验证"],
             ].map(([item, Icon, desc]) => (
               <button

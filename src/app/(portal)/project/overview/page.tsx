@@ -20,7 +20,7 @@ import {
   Progress,
   SectionTitle,
 } from "@/components/ui";
-import { useDemo } from "@/lib/store";
+import { usePortal } from "@/lib/store";
 import {
   calculateEvidenceCoverage,
   calculateProjectRisk,
@@ -28,7 +28,7 @@ import {
 } from "@/lib/metrics";
 
 export default function ProjectOverview() {
-  const { state } = useDemo();
+  const { state } = usePortal();
   const s = state.scenario;
   const completeness = calculateScenarioCompleteness({
     requiredFields: [

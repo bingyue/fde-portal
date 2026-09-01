@@ -12,7 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useDemo } from "@/lib/store";
+import { usePortal } from "@/lib/store";
 import {
   Badge,
   Button,
@@ -23,7 +23,7 @@ import {
 } from "@/components/ui";
 
 export default function DashboardPage() {
-  const { state } = useDemo();
+  const { state } = usePortal();
   const [aiConfigured, setAiConfigured] = useState(false);
   useEffect(() => {
     void fetch("/api/ai/config", { cache: "no-store" })
@@ -43,7 +43,7 @@ export default function DashboardPage() {
         <EmptyState
           icon={<BriefcaseBusiness size={20} />}
           title="尚未创建工作空间"
-          description="返回入口页，创建课程、团队或企业 Workspace。"
+          description="返回入口页，创建团队或企业 Workspace。"
           action={
             <Link href="/">
               <Button>创建 Workspace</Button>

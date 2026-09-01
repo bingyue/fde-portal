@@ -11,7 +11,7 @@ import {
   PageHeader,
   Select,
 } from "@/components/ui";
-import { useDemo } from "@/lib/store";
+import { usePortal } from "@/lib/store";
 import type { Asset } from "@/lib/types";
 
 const types: Asset["type"][] = [
@@ -28,7 +28,7 @@ const types: Asset["type"][] = [
 ];
 
 export default function AssetsPage() {
-  const { state, addAsset } = useDemo();
+  const { state, addAsset } = usePortal();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<{
     name: string;

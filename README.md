@@ -14,7 +14,7 @@ npm run dev
 
 ## 已完成功能
 
-- 登录入口、Workspace 选择/创建、课程/团队/企业三类空间
+- 登录入口、Workspace 选择/创建、团队/企业两类交付空间
 - 工作台、项目列表、待办、高风险提醒、活动和 AI 建议
 - 三类项目的空白创建流程；不内置业务项目或评测样例
 - 项目总览六项指标与 P0–P5 阶段门禁
@@ -67,7 +67,7 @@ scripts/sync-fde-skills.mjs # GitHub 仓库同步与打包器
 
 1. 创建 Supabase 项目并复制 `.env.example` 为 `.env.local`。
 2. 填写 `NEXT_PUBLIC_SUPABASE_URL`、`NEXT_PUBLIC_SUPABASE_ANON_KEY` 和服务端 `SUPABASE_SERVICE_ROLE_KEY`。
-3. 应用 `supabase/migrations/202608300001_init.sql`。
+3. 依次应用 `supabase/migrations/` 下的全部迁移。
 4. 创建 Auth 用户。`supabase/seed.sql` 故意留空，首个 Workspace 与项目从界面创建。
 
 Migration 包含 Workspace 多租户字段、外键、索引、删除策略、更新时间触发器、核心写操作 AuditLog、成员角色 RLS 以及私有 evidence Storage 策略。
@@ -117,4 +117,4 @@ npm run build
 
 ## V1 边界与后续建议
 
-本期没有实现即时聊天、甘特图、通用 Kanban、课程支付、完整 Agent 运行基础设施或通用 Trace。Supabase 数据访问已完成 Schema 与安全策略，但业务 UI 当前使用浏览器本地仓储；生产部署下一步应补 `SupabaseRepository`，在登录会话存在时切换数据源。之后可增加真实 Evidence 文件上传、邮件通知、报告服务端 PDF 和外部 Eval Runner Webhook。
+本期没有实现即时聊天、甘特图、通用 Kanban、完整 Agent 运行基础设施或通用 Trace。Supabase 数据访问已完成 Schema 与安全策略，但业务 UI 当前使用浏览器本地仓储；生产部署下一步应补 `SupabaseRepository`，在登录会话存在时切换数据源。之后可增加真实 Evidence 文件上传、邮件通知、报告服务端 PDF 和外部 Eval Runner Webhook。

@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { BriefcaseBusiness } from "lucide-react";
 import { Button, EmptyState, PageHeader } from "@/components/ui";
-import { useDemo } from "@/lib/store";
+import { usePortal } from "@/lib/store";
 
 export default function ProjectLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { state } = useDemo();
+  const { state } = usePortal();
   if (!state.project.id)
     return (
       <div className="animate-rise">

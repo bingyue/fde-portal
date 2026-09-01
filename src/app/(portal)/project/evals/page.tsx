@@ -30,7 +30,7 @@ import {
   Progress,
   SectionTitle,
 } from "@/components/ui";
-import { useDemo } from "@/lib/store";
+import { usePortal } from "@/lib/store";
 import type { EvalCase, EvalRun } from "@/lib/types";
 
 type RunInput = Omit<EvalRun, "id" | "createdAt">;
@@ -91,7 +91,7 @@ function parseEvalCsv(text: string): EvalCase[] {
 }
 
 export default function EvalsPage() {
-  const { state, createEvalSuite, addEvalCases, recordEvalRun } = useDemo();
+  const { state, createEvalSuite, addEvalCases, recordEvalRun } = usePortal();
   const [suiteOpen, setSuiteOpen] = useState(false);
   const [runOpen, setRunOpen] = useState(false);
   const [suiteName, setSuiteName] = useState("");

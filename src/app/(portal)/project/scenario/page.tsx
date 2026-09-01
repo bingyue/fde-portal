@@ -22,7 +22,7 @@ import {
   SectionTitle,
   Textarea,
 } from "@/components/ui";
-import { useDemo } from "@/lib/store";
+import { usePortal } from "@/lib/store";
 import type { ScenarioCard } from "@/lib/types";
 import { calculateScenarioCompleteness } from "@/lib/metrics";
 
@@ -115,7 +115,7 @@ const interviewFields = [
 
 export default function ScenarioPage() {
   const { state, updateScenario, generateScenario, confirmScenario } =
-    useDemo();
+    usePortal();
   const [editOpen, setEditOpen] = useState(false);
   const [interviewOpen, setInterviewOpen] = useState(false);
   const [issuesOpen, setIssuesOpen] = useState(false);

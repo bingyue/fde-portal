@@ -13,11 +13,11 @@ import {
   Textarea,
 } from "@/components/ui";
 import { calculateEvidenceCoverage } from "@/lib/metrics";
-import { useDemo } from "@/lib/store";
+import { usePortal } from "@/lib/store";
 import type { Review } from "@/lib/types";
 
 export default function ReviewsPage() {
-  const { state, approveReview } = useDemo();
+  const { state, approveReview } = usePortal();
   const [active, setActive] = useState<Review | null>(null);
   const [comment, setComment] = useState("");
   const reviewCounts = {

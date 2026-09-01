@@ -26,7 +26,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { DemoProvider, useDemo } from "@/lib/store";
+import { PortalProvider, usePortal } from "@/lib/store";
 import { ThemeSelector } from "./theme-provider";
 import { Badge } from "./ui";
 
@@ -57,7 +57,7 @@ const project = [
 
 function ShellContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { state, toast, clearLocalData } = useDemo();
+  const { state, toast, clearLocalData } = usePortal();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isProject = pathname.startsWith("/project/");
   const pendingReviews = state.reviews.filter(
@@ -251,8 +251,8 @@ function ShellContent({ children }: { children: React.ReactNode }) {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <DemoProvider>
+    <PortalProvider>
       <ShellContent>{children}</ShellContent>
-    </DemoProvider>
+    </PortalProvider>
   );
 }

@@ -22,7 +22,7 @@ import {
   Progress,
   SectionTitle,
 } from "@/components/ui";
-import { useDemo } from "@/lib/store";
+import { usePortal } from "@/lib/store";
 
 export default function PocPage() {
   const {
@@ -32,7 +32,7 @@ export default function PocPage() {
     closeRisk,
     addAcceptanceCriterion,
     toggleAcceptanceCriterion,
-  } = useDemo();
+  } = usePortal();
   const [selectedId, setSelectedId] = useState(
     state.stages.find((stage) => stage.status === "进行中")?.id ||
       state.stages[0]?.id ||

@@ -13,11 +13,11 @@ import {
   Select,
   SectionTitle,
 } from "@/components/ui";
-import { useDemo } from "@/lib/store";
+import { usePortal } from "@/lib/store";
 import type { Workspace } from "@/lib/types";
 
 export default function TeamPage() {
-  const { state, createWorkspace } = useDemo();
+  const { state, createWorkspace } = usePortal();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [type, setType] = useState<Workspace["type"]>("企业空间");
@@ -128,7 +128,6 @@ export default function TeamPage() {
                 setType(event.target.value as Workspace["type"])
               }
             >
-              <option>课程空间</option>
               <option>团队空间</option>
               <option>企业空间</option>
             </Select>
