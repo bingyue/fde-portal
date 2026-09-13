@@ -2,11 +2,6 @@ import { expect, test } from "@playwright/test";
 
 async function createDeliveryProject(page: import("@playwright/test").Page) {
   await page.goto("/");
-  await page
-    .getByRole("button", { name: "创建 Workspace", exact: true })
-    .click();
-  await page.getByLabel("Workspace 名称").fill("FDE 交付实验室");
-  await page.getByRole("button", { name: "创建并进入", exact: true }).click();
   await page.getByRole("button", { name: "创建项目", exact: true }).click();
   await page.getByLabel("项目名称").fill("智能工单交付项目");
   await page.getByLabel("所属行业").selectOption({ label: "零售电商" });

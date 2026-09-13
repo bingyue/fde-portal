@@ -7,7 +7,6 @@ import {
   Blocks,
   BriefcaseBusiness,
   CheckSquare2,
-  ChevronDown,
   CircleUserRound,
   Compass,
   FileCheck2,
@@ -48,7 +47,7 @@ const capabilities = [
   ["/project/assets", "资产中心", Archive],
   ["/skills", "Skill 中心", Workflow],
   ["/settings/ai", "AI 模型配置", KeyRound],
-  ["/team", "团队设置", UsersRound],
+  ["/team", "使用设置", UsersRound],
 ] as const satisfies readonly NavItem[];
 
 const project = [
@@ -73,7 +72,7 @@ function ShellContent({ children }: { children: React.ReactNode }) {
         role="status"
         className="grid min-h-screen place-items-center bg-[var(--paper)] text-sm text-[var(--muted)]"
       >
-        正在恢复交付工作区…
+        正在加载项目数据…
       </div>
     );
   const isProject = pathname.startsWith("/project/");
@@ -146,23 +145,6 @@ function ShellContent({ children }: { children: React.ReactNode }) {
           </button>
         </div>
 
-        <div className="border-b border-[var(--line)] p-4">
-          <button className="flex w-full items-center gap-3 rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--surface-subtle)] px-3 py-2.5 text-left transition hover:border-[var(--primary-border)]">
-            <span className="grid size-8 place-items-center rounded-[var(--radius-sm)] bg-[var(--primary-soft)] text-[11px] font-bold text-[var(--primary)]">
-              {state.workspace.id ? state.workspace.name.slice(0, 2) : "--"}
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-xs font-semibold text-[var(--ink)]">
-                {state.workspace.name}
-              </span>
-              <span className="text-[10px] text-[var(--sidebar-muted)]">
-                {state.workspace.type} · {state.workspace.members} 人
-              </span>
-            </span>
-            <ChevronDown size={14} className="text-[var(--sidebar-muted)]" />
-          </button>
-        </div>
-
         <nav className="flex-1 overflow-y-auto py-1">
           {groupLabel("交付管理")}
           {deliveryManagement.map(navItem)}
@@ -183,7 +165,7 @@ function ShellContent({ children }: { children: React.ReactNode }) {
         <div className="border-t border-[var(--line)] p-4">
           <div className="mb-3 flex items-center gap-2 text-[11px] text-[var(--sidebar-muted)]">
             <span className="signal-pulse size-2 rounded-full bg-[var(--success)]" />
-            真实数据模式 · 本地工作区
+            项目数据保存在本机浏览器
           </div>
           <button
             onClick={clearLocalData}
@@ -214,14 +196,12 @@ function ShellContent({ children }: { children: React.ReactNode }) {
               <Menu size={20} />
             </button>
             <div className="hidden min-w-0 items-center gap-2 text-xs sm:flex">
-              <span className="truncate text-[var(--muted)]">
-                {state.workspace.name}
-              </span>
-              <span className="text-[var(--line-strong)]">/</span>
               <span className="truncate font-semibold text-[var(--ink)]">
                 {isProject && state.project.id
                   ? state.project.name
-                  : "平台工作区"}
+                  : [...deliveryManagement, ...capabilities].find(
+                      ([href]) => href === pathname,
+                    )?.[1] || "FDE Portal"}
               </span>
               {isProject && state.project.id && (
                 <Badge tone="info">{state.project.stage}</Badge>
@@ -242,7 +222,7 @@ function ShellContent({ children }: { children: React.ReactNode }) {
               <span className="hidden text-left text-xs sm:block">
                 <b className="block text-[var(--ink)]">当前用户</b>
                 <small className="text-[10px] text-[var(--muted)]">
-                  Workspace Owner
+                  管理员
                 </small>
               </span>
             </button>

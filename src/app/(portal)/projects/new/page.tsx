@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   Button,
-  EmptyState,
   Field,
   Input,
   PageHeader,
@@ -16,7 +15,7 @@ import { usePortal } from "@/lib/store";
 import type { Project } from "@/lib/types";
 
 export default function NewProjectPage() {
-  const { createProject, state } = usePortal();
+  const { createProject } = usePortal();
   const router = useRouter();
   const [type, setType] = useState<Project["type"]>("企业POC");
   const [form, setForm] = useState({
@@ -29,22 +28,6 @@ export default function NewProjectPage() {
   });
   const update = (key: keyof typeof form, value: string) =>
     setForm((old) => ({ ...old, [key]: value }));
-  if (!state.workspace.id)
-    return (
-      <div className="animate-rise">
-        <PageHeader
-          eyebrow="WORKSPACE REQUIRED"
-          title="先创建 Workspace"
-          description="项目必须属于一个真实 Workspace。"
-        />
-        <EmptyState
-          icon={<Building2 size={20} />}
-          title="没有 Workspace"
-          description="返回入口页完成创建后再继续。"
-          action={<Button onClick={() => router.push("/")}>返回入口</Button>}
-        />
-      </div>
-    );
   return (
     <div className="animate-rise">
       <PageHeader
@@ -106,7 +89,7 @@ export default function NewProjectPage() {
             <div>
               <h2 className="font-bold">03 · 项目信息</h2>
               <p className="mt-1 text-xs text-[var(--muted)]">
-                当前 Workspace：{state.workspace.name}
+                填写业务目标与负责人，即可开始。
               </p>
             </div>
             <span className="font-data text-[10px] font-bold text-[var(--primary)]">

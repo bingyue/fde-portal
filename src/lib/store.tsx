@@ -24,7 +24,6 @@ import type {
   Review,
   ScenarioCard,
   Stakeholder,
-  Workspace,
   WorkflowStep,
 } from "./types";
 import { blankScenario, createBlankStages, emptyState } from "./empty-state";
@@ -44,7 +43,6 @@ interface PortalContextValue {
   state: PortalState;
   hydrated: boolean;
   toast: string | null;
-  createWorkspace: (workspace: Pick<Workspace, "name" | "type">) => void;
   createProject: (project: Partial<Project>) => void;
   updateOutcomeContract: (
     contract: Partial<OutcomeContract>,
@@ -154,18 +152,6 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
       },
       confirmDiagnosis: (sessionId, confirmedBy) => {
         setState((old) => confirmDiagnosisProject(old, sessionId, confirmedBy));
-      },
-      createWorkspace: (workspace) => {
-        setState((old) => ({
-          ...old,
-          workspace: { ...workspace, id: uid("ws"), members: 1 },
-          flow: { ...old.flow, workspaceCreated: true },
-          activities: [
-            activity(`创建了 ${workspace.type}「${workspace.name}」`),
-            ...old.activities,
-          ],
-        }));
-        notify("Workspace 已创建并切换");
       },
       createProject: (project) => {
         const projectId = uid("project");

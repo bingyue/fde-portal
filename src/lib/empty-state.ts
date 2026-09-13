@@ -65,10 +65,10 @@ export function createBlankStages(): PocStage[] {
 export const emptyState: PortalState = {
   diagnoses: [],
   workspace: {
-    id: "",
-    name: "尚未创建 Workspace",
+    id: "00000000-0000-4000-8000-000000000001",
+    name: "FDE Portal",
     type: "团队空间",
-    members: 0,
+    members: 1,
   },
   project: {
     id: "",
@@ -208,7 +208,7 @@ export const emptyState: PortalState = {
   reports: [],
   activities: [],
   flow: {
-    workspaceCreated: false,
+    workspaceCreated: true,
     projectCreated: false,
     scenarioConfirmed: false,
     pocGenerated: false,

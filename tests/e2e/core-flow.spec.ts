@@ -1,16 +1,11 @@
 import { expect, test } from "@playwright/test";
 
-test("真实数据模式创建 Workspace 与首个项目", async ({ page }) => {
+test("打开首页即可直接创建首个项目", async ({ page }) => {
   await page.goto("/");
-  await page
-    .getByRole("button", { name: "创建 Workspace", exact: true })
-    .click();
-  await expect(page.getByText("课程空间", { exact: true })).toHaveCount(0);
-  await page.getByLabel("Workspace 名称").fill("E2E AI 交付中心");
-  await page.getByRole("button", { name: "创建并进入", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: /E2E AI 交付中心 已就绪/ }),
+    page.getByRole("heading", { name: "开始你的 AI 项目" }),
   ).toBeVisible();
+  await expect(page.getByText(/Workspace/)).toHaveCount(0);
 
   await page.getByRole("button", { name: "创建项目", exact: true }).click();
   await expect(page.getByText("课程实训项目", { exact: true })).toHaveCount(0);

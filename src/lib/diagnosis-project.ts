@@ -25,14 +25,6 @@ export function confirmDiagnosisProject(
   const stages = state.stages.length ? state.stages : createBlankStages();
   return {
     ...state,
-    workspace: state.workspace.id
-      ? state.workspace
-      : {
-          id: crypto.randomUUID(),
-          name: facts.organization,
-          type: "企业空间",
-          members: 1,
-        },
     project: {
       ...state.project,
       id: projectId,

@@ -578,7 +578,7 @@ export default function ChatPage() {
         description={
           state.project.id
             ? `将更新「${state.project.name}」的场景卡与结果契约，补充里程碑、验收项、风险和评审记录。`
-            : "将创建工作空间和首个项目，并写入场景卡、POC 里程碑、验收项、风险和评审记录。"
+            : "将创建首个项目，并写入场景卡、POC 里程碑、验收项、风险和评审记录。"
         }
       >
         <form

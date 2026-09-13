@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   FileCheck2,
   KeyRound,
+  MessagesSquare,
   Plus,
   Sparkles,
 } from "lucide-react";
@@ -32,33 +33,13 @@ export default function DashboardPage() {
         setAiConfigured(Boolean(data.configured)),
       );
   }, []);
-  if (!state.workspace.id)
-    return (
-      <div className="animate-rise">
-        <PageHeader
-          eyebrow="WORKSPACE REQUIRED"
-          title="先创建 Workspace"
-          description="Workspace 是项目数据与权限的隔离边界。系统当前没有加载任何预置数据。"
-        />
-        <EmptyState
-          icon={<BriefcaseBusiness size={20} />}
-          title="尚未创建工作空间"
-          description="返回入口页，创建团队或企业 Workspace。"
-          action={
-            <Link href="/">
-              <Button>创建 Workspace</Button>
-            </Link>
-          }
-        />
-      </div>
-    );
   if (!state.project.id)
     return (
       <div className="animate-rise">
         <PageHeader
-          eyebrow="EMPTY WORKSPACE"
-          title={`${state.workspace.name} 已就绪`}
-          description="当前空间没有项目和样例数据。先确认 DeepSeek 连接，再创建第一个真实项目。"
+          eyebrow="GET STARTED"
+          title="开始你的 AI 项目"
+          description="和岚舟聊聊业务问题，或直接创建项目。"
           actions={
             <Link href="/projects/new">
               <Button>
@@ -69,18 +50,21 @@ export default function DashboardPage() {
           }
         />
         <div className="mb-6 grid gap-4 md:grid-cols-3">
-          <div className="card p-5">
-            <span className="grid size-10 place-items-center rounded-[var(--radius-md)] bg-[var(--success-soft)] text-[var(--success)]">
-              <CheckCircle2 size={18} />
+          <Link
+            href="/chat"
+            className="card p-5 transition hover:border-[var(--primary-border)]"
+          >
+            <span className="grid size-10 place-items-center rounded-[var(--radius-md)] bg-[var(--primary-soft)] text-[var(--primary)]">
+              <MessagesSquare size={18} />
             </span>
-            <b className="mt-5 block">Workspace</b>
+            <b className="mt-5 block">与岚舟诊断场景</b>
             <p className="mt-1 text-xs text-[var(--muted)]">
-              {state.workspace.name}
+              逐步梳理需求，一起确认 POC 方案
             </p>
-            <Badge tone="success" className="mt-4">
-              已就绪
-            </Badge>
-          </div>
+            <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[var(--primary)]">
+              开始对话 <ArrowRight size={12} />
+            </span>
+          </Link>
           <Link
             href="/settings/ai"
             className="card group p-5 transition hover:border-[var(--primary-border)]"
@@ -116,8 +100,8 @@ export default function DashboardPage() {
         </div>
         <EmptyState
           icon={<Sparkles size={20} />}
-          title="没有样例数据，正合适"
-          description="创建项目后，场景卡、POC、Eval、资产与报告将全部来自你的真实业务输入。"
+          title="还没有项目"
+          description="确认诊断方案或创建项目后，即可继续完善场景卡、评测与验收。"
         />
       </div>
     );
@@ -141,7 +125,7 @@ export default function DashboardPage() {
   return (
     <div className="animate-rise">
       <PageHeader
-        eyebrow="LIVE WORKSPACE"
+        eyebrow="PROJECT DELIVERY"
         title="项目交付工作台"
         description="所有指标来自当前项目的真实记录；未录入的数据保持为空或 0。"
         actions={

@@ -17,7 +17,7 @@ export default function ProjectLayout({
         <PageHeader
           eyebrow="PROJECT REQUIRED"
           title="尚未创建项目"
-          description="当前 Workspace 没有预置项目或样例数据。请先创建一个真实业务项目。"
+          description="先创建项目，或通过 AI 场景诊断确定你的业务方案。"
         />
         <EmptyState
           icon={<BriefcaseBusiness size={20} />}
