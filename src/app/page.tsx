@@ -106,6 +106,9 @@ function Welcome() {
               让每个生产决策都有真实数据和可追溯证据。
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
+              <Button onClick={() => router.push("/chat")} className="!px-5">
+                与岚舟诊断场景 <ArrowRight size={16} />
+              </Button>
               {state.workspace.id ? (
                 <Button
                   onClick={() => router.push("/dashboard")}

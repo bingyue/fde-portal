@@ -63,6 +63,7 @@ export function createBlankStages(): PocStage[] {
 }
 
 export const emptyState: PortalState = {
+  diagnoses: [],
   workspace: {
     id: "",
     name: "尚未创建 Workspace",

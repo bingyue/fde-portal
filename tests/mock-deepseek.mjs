@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import { diagnosisFixture } from "./diagnosis-fixture.mjs";
 
 const server = createServer((request, response) => {
   response.setHeader("Content-Type", "application/json");
@@ -13,6 +14,38 @@ const server = createServer((request, response) => {
     });
     request.on("end", () => {
       const payload = JSON.parse(body || "{}");
+      if (payload.messages?.[0]?.content?.includes("虚拟 AI 场景诊断顾问")) {
+        const rounds = payload.messages.filter((m) => m.role === "user").length;
+        const result =
+          rounds >= 3
+            ? diagnosisFixture
+            : {
+                ...diagnosisFixture,
+                step: rounds,
+                reply:
+                  rounds === 1
+                    ? "了解了查询耗时问题。目前单次耗时多久，希望改善到什么程度？"
+                    : "接下来确认数据权限、人工兜底、试用周期和验收负责人。",
+                facts: {
+                  ...diagnosisFixture.facts,
+                  acceptance: "",
+                  timeline: "",
+                },
+                openQuestions: ["验收方式和时间资源还需要确认"],
+                plan: null,
+              };
+        response.end(
+          JSON.stringify({
+            choices: [
+              {
+                finish_reason: "stop",
+                message: { content: JSON.stringify(result) },
+              },
+            ],
+          }),
+        );
+        return;
+      }
       const skillInput = payload.messages?.at(-1)?.content || "";
       response.end(
         JSON.stringify({

@@ -241,6 +241,7 @@ export interface Activity {
 }
 
 export interface PortalState {
+  diagnoses: import("./diagnosis").DiagnosisSession[];
   workspace: Workspace;
   project: Project;
   outcomeContract: OutcomeContract;

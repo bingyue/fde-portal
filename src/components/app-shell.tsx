@@ -17,6 +17,7 @@ import {
   Home,
   KeyRound,
   Menu,
+  MessagesSquare,
   Search,
   Settings2,
   ShieldCheck,
@@ -36,6 +37,7 @@ import { Badge } from "./ui";
 type NavItem = readonly [href: string, label: string, Icon: LucideIcon];
 
 const deliveryManagement = [
+  ["/chat", "AI 场景诊断", MessagesSquare],
   ["/dashboard", "我的工作台", Home],
   ["/projects/new", "项目中心", BriefcaseBusiness],
   ["/reviews", "待办与评审", CheckSquare2],

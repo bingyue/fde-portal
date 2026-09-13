@@ -1,0 +1,50 @@
+// Isolated test fixture; never imported by production code.
+export const diagnosisFixture = {
+  reply: "需求已梳理完成，请核对下方方案，或告诉我需要调整的地方。",
+  step: 5,
+  facts: {
+    organization: "测试企业",
+    users: "客服团队",
+    problem: "查询耗时",
+    workflow: "人工查询文档",
+    baseline: "每次8分钟",
+    goal: "降至2分钟",
+    data: "已获授权的脱敏文档",
+    scope: "文档问答建议",
+    exclusions: "不自动发消息",
+    humanBoundary: "客服审核后发送",
+    acceptance: "准确率90%，耗时2分钟，试用参与率80%",
+    owner: "测试负责人",
+    timeline: "2周，2名客服参与",
+  },
+  openQuestions: [],
+  suggestions: [],
+  plan: {
+    title: "客服文档问答 POC",
+    summary: "验证问答建议能否减少查询耗时。",
+    solution: "检索授权文档生成建议，由客服审核后发送。",
+    risks: ["答案不准确时回退人工检索"],
+    stopCondition: "发生敏感信息泄露立即停止试用",
+    milestones: [
+      {
+        stage: "P2",
+        title: "准备评测",
+        deliverable: "脱敏样本集",
+        owner: "测试负责人",
+        timing: "第1周",
+      },
+      {
+        stage: "P3",
+        title: "验证并试用",
+        deliverable: "评测与试用报告",
+        owner: "测试负责人",
+        timing: "第2周",
+      },
+    ],
+    criteria: [
+      { dimension: "技术", title: "人工标注样本准确率达到90%" },
+      { dimension: "业务", title: "抽样查询平均耗时不超过2分钟" },
+      { dimension: "采纳", title: "2名客服试用参与率不低于80%" },
+    ],
+  },
+};

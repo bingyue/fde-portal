@@ -33,10 +33,14 @@ import {
   isEvidenceGateReady,
 } from "./delivery-model";
 import { normalizePortalState } from "./state-migration";
+import type { DiagnosisSession } from "./diagnosis";
+import { confirmDiagnosisProject } from "./diagnosis-project";
 
 const STORAGE_KEY = "fde-portal-live-v2";
 
 interface PortalContextValue {
+  saveDiagnosis: (session: DiagnosisSession) => void;
+  confirmDiagnosis: (sessionId: string, confirmedBy: string) => void;
   state: PortalState;
   hydrated: boolean;
   toast: string | null;
@@ -138,6 +142,19 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
       state,
       hydrated,
       toast,
+      saveDiagnosis: (session) => {
+        setState((old) => ({
+          ...old,
+          diagnoses: old.diagnoses.some((item) => item.id === session.id)
+            ? old.diagnoses.map((item) =>
+                item.id === session.id && !item.confirmedAt ? session : item,
+              )
+            : [session, ...old.diagnoses],
+        }));
+      },
+      confirmDiagnosis: (sessionId, confirmedBy) => {
+        setState((old) => confirmDiagnosisProject(old, sessionId, confirmedBy));
+      },
       createWorkspace: (workspace) => {
         setState((old) => ({
           ...old,

@@ -14,6 +14,7 @@ export function normalizePortalState(saved: LegacyPortalState): PortalState {
   return {
     ...emptyState,
     ...saved,
+    diagnoses: saved.diagnoses || [],
     workspace: {
       ...saved.workspace,
       type: saved.workspace.type === "企业空间" ? "企业空间" : "团队空间",
