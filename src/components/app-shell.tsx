@@ -36,6 +36,7 @@ import { Badge } from "./ui";
 type NavItem = readonly [href: string, label: string, Icon: LucideIcon];
 
 const deliveryManagement = [
+  ["/workbench", "FDE 全流程工作台", Workflow],
   ["/chat", "AI 场景诊断", MessagesSquare],
   ["/dashboard", "我的工作台", Home],
   ["/projects/new", "项目中心", BriefcaseBusiness],
@@ -123,7 +124,7 @@ function ShellContent({ children }: { children: React.ReactNode }) {
         className={`portal-sidebar fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col border-r border-[var(--line)] bg-[var(--sidebar)] text-[var(--sidebar-ink)] shadow-[4px_0_18px_rgba(15,23,42,0.025)] transition-transform duration-300 ${mobileOpen ? "!translate-x-0" : ""}`}
       >
         <div className="flex h-[68px] items-center justify-between border-b border-[var(--line)] px-5">
-          <Link href="/dashboard" className="flex items-center gap-3">
+          <Link href="/workbench" className="flex items-center gap-3">
             <span className="grid size-9 place-items-center rounded-[var(--radius-md)] bg-[var(--primary)] text-sm font-black text-white shadow-sm">
               F
             </span>

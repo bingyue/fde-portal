@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-test("打开首页即可直接创建首个项目", async ({ page }) => {
-  await page.goto("/");
+test("旧版工作台仍可创建首个项目", async ({ page }) => {
+  await page.goto("/dashboard");
   await expect(
     page.getByRole("heading", { name: "开始你的 AI 项目" }),
   ).toBeVisible();

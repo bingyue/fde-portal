@@ -16,9 +16,9 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "FDE Portal · AI 交付项目管理平台",
+  title: "FDE Workbench · 企业 AI 转型智能工作台",
   description:
-    "面向 FDE 团队的 AI 项目需求澄清、POC、Eval、风险、评审与验收协同平台",
+    "从企业问题到交付成果：全流程地图、专业 Skills、FDE 判断与持续项目记忆。",
 };
 
 const themeInitScript = `
