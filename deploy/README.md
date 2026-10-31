@@ -12,7 +12,7 @@ FDE_IMAGE=fde-portal:<commit> docker compose -f deploy/compose.yaml up -d
 
 NEXT_PUBLIC_BASE_PATH 是构建期配置，默认本地开发仍使用根路径。Dockerfile 启用 Next standalone，包含 public、静态文件和按需执行的 Skills。Docker 构建上下文排除 .env、.data、Git、测试产物和本地依赖。
 
-在现有 HTTPS server 中 include deploy/nginx-location.conf 对应的服务器文件。先备份现有 Nginx 配置，使用独立的 /etc/nginx/.fde-portal.htpasswd（root:www-data、0640），运行 nginx -t，通过后 reload。访问认证覆盖页面、API 和下载，不修改已有应用的路由或账号。
+在现有 HTTPS server 中 include deploy/nginx-location.conf 对应的服务器文件。先备份现有 Nginx 配置，使用独立的 /etc/nginx/.fde-portal.htpasswd（root:www-data、0640），运行 nginx -t，通过后 reload。访问认证覆盖页面、API 和下载，并拒绝不匹配当前 HTTPS 站点的 Origin，保护旧版配置接口免受跨站写入；不修改已有应用的路由或账号。
 
 ## 数据与密钥
 
