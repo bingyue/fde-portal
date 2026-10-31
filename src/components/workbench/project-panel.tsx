@@ -22,9 +22,11 @@ import {
   type StageId,
   type WorkProject,
 } from "@/lib/workbench/model";
-import { workSkills } from "@/lib/workbench/skills";
+import { workSkills, skillName } from "@/lib/workbench/skills";
+import { documentTypes } from "@/lib/workbench/workflow";
 import { api, download, statusLabels, time } from "./helpers";
 import type { DraftCommand } from "./decision-dialog";
+import { ActionMetadata } from "./core-insights";
 
 const tabs = [
   { id: "stage", name: "阶段", Icon: Workflow },
@@ -81,12 +83,16 @@ export function ProjectPanel({
   async function openSkill(id: string) {
     setSkillError("");
     try {
-      const { content } = await api<{ content: string }>(
-        `/api/workbench/skills/${id}`,
-      );
+      const { content, protocol } = await api<{
+        content: string;
+        protocol: unknown;
+      }>(`/api/workbench/skills/${id}`);
       setDocument({
-        title: workSkills.find((s) => s.id === id)!.name,
-        content,
+        title: skillName(id),
+        content:
+          content +
+          "\n\n## 应用执行协议（不属于 Agent Skills 标准字段）\n" +
+          JSON.stringify(protocol, null, 2),
       });
     } catch (e) {
       setSkillError(e instanceof Error ? e.message : "读取失败");
@@ -208,7 +214,7 @@ export function ProjectPanel({
             <div className="wb-inline-skills">
               {definition.skills.map((id) => (
                 <button key={id} onClick={() => void openSkill(id)}>
-                  {workSkills.find((s) => s.id === id)?.name} ↗
+                  {skillName(id)} ↗
                 </button>
               ))}
             </div>
@@ -228,7 +234,10 @@ export function ProjectPanel({
                 >
                   <FileStack size={14} />
                   {asset.title}
-                  <small>v{asset.version}</small>
+                  <small>
+                    v{asset.version} ·{" "}
+                    {asset.reviewStatus === "draft" ? "待审核" : "已审核"}
+                  </small>
                 </button>
               ))}
             {!project.assets.some((asset) => asset.stage === stage) && (
@@ -310,6 +319,7 @@ export function ProjectPanel({
                   )}
                 </div>
                 <h3>{task.title}</h3>
+                <ActionMetadata action={task} project={project} />
                 <p>
                   {task.owner} · {stages.find((s) => s.id === task.stage)?.name}
                 </p>
@@ -376,6 +386,100 @@ export function ProjectPanel({
               <h2>企业事实与资料</h2>
               <p>事实经过确认才进入持续记忆，原始资料始终保留。</p>
             </div>
+            <h3 className="wb-side-heading">
+              开放问题{" "}
+              <span>
+                {
+                  (project.issues || []).filter((i) => i.status === "open")
+                    .length
+                }
+              </span>
+            </h3>
+            {(project.issues || [])
+              .filter((i) => i.status === "open")
+              .map((issue) => (
+                <article className="wb-source" key={issue.id}>
+                  <div className="wb-row">
+                    <Badge
+                      tone={issue.priority === "P0" ? "warning" : "neutral"}
+                    >
+                      {issue.priority}
+                    </Badge>
+                    <strong>{issue.question}</strong>
+                  </div>
+                  <p>为什么：{issue.why}</p>
+                  <p>应该问：{issue.askWho}</p>
+                  <small>
+                    累计 {issue.analysisIds.length} 轮分析 · 来源{" "}
+                    {issue.sourceIds.length} 份
+                  </small>
+                  <div className="wb-row">
+                    <Button
+                      variant="secondary"
+                      onClick={() =>
+                        onCommand({
+                          type: "issue",
+                          issueId: issue.id,
+                          status: "resolved",
+                        })
+                      }
+                    >
+                      关联证据并关闭
+                    </Button>
+                    {issue.priority === "P0" && (
+                      <Button
+                        variant="ghost"
+                        onClick={() =>
+                          onCommand({
+                            type: "issue",
+                            issueId: issue.id,
+                            status: "open",
+                            priority: "P1",
+                          })
+                        }
+                      >
+                        调整为 P1
+                      </Button>
+                    )}
+                  </div>
+                </article>
+              ))}
+            {(project.issues || []).some((i) => i.status === "resolved") && (
+              <details className="wb-summary">
+                <summary>查看已核实问题</summary>
+                {project
+                  .issues!.filter((i) => i.status === "resolved")
+                  .map((issue) => (
+                    <article className="wb-source" key={issue.id}>
+                      <strong>{issue.question}</strong>
+                      <p>{issue.resolution}</p>
+                      <small>
+                        {issue.resolvedBy} · {time(issue.updatedAt)}
+                      </small>
+                      {issue.evidenceId && (
+                        <button
+                          className="wb-evidence-link"
+                          onClick={() => openEvidence(issue.evidenceId!)}
+                        >
+                          查看核实证据
+                        </button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        onClick={() =>
+                          onCommand({
+                            type: "issue",
+                            issueId: issue.id,
+                            status: "open",
+                          })
+                        }
+                      >
+                        重新打开问题
+                      </Button>
+                    </article>
+                  ))}
+              </details>
+            )}
             <h3 className="wb-side-heading">
               已确认事实{" "}
               <span>
@@ -456,10 +560,52 @@ export function ProjectPanel({
             <div className="wb-panel-title">
               <span className="wb-eyebrow">DELIVERY ASSETS</span>
               <h2>交付资产</h2>
-              <p>确认行动后归档；同名交付物生成新版本，历史版本保留。</p>
+              <p>
+                基于人工确认生成文档，审核后可作为证据；新版本保留完整历史。
+              </p>
             </div>
+            <Button
+              disabled={
+                busy ||
+                !project.decisions.some((d) =>
+                  ["fact", "action", "stage"].includes(d.kind),
+                )
+              }
+              onClick={() =>
+                onCommand({ type: "build-document", documentType: "行动计划" })
+              }
+            >
+              生成交付文档
+            </Button>
+            {project.analyses
+              .filter((a) => a.purpose === "deliverable")
+              .slice(0, 3)
+              .map((a) => (
+                <div className="wb-note" key={a.id}>
+                  <strong>
+                    {a.documentType} · {statusLabels[a.status]}
+                  </strong>
+                  {a.error && <p>{a.error}</p>}
+                  {a.status === "failed" && (
+                    <Button
+                      variant="secondary"
+                      disabled={busy}
+                      onClick={() =>
+                        onCommand({
+                          type: "build-document",
+                          documentType:
+                            documentTypes.find((t) => t === a.documentType) ||
+                            "行动计划",
+                        })
+                      }
+                    >
+                      重新申请生成
+                    </Button>
+                  )}
+                </div>
+              ))}
             {!project.assets.length && (
-              <Empty text="目前还没有确认的交付物。先查看 AI 输出的草稿，再确认行动归档。" />
+              <Empty text="尚无交付文档。确认项目事实或行动后，可生成文档草稿，审核通过后用于验收。" />
             )}
             {[...project.assets].reverse().map((asset) => (
               <article className="wb-asset" key={asset.id}>
@@ -470,7 +616,9 @@ export function ProjectPanel({
                 <h3>{asset.title}</h3>
                 <p>
                   {stages.find((s) => s.id === asset.stage)?.name} ·{" "}
-                  {asset.approvedBy} 确认
+                  {asset.reviewStatus === "draft"
+                    ? "待人工审核"
+                    : `${asset.approvedBy} 确认`}
                 </p>
                 <small>{time(asset.createdAt)}</small>
                 <div className="wb-row">
@@ -479,6 +627,27 @@ export function ProjectPanel({
                     onClick={() => openEvidence(asset.id)}
                   >
                     查看正文
+                  </Button>
+                  {asset.reviewStatus === "draft" && (
+                    <Button
+                      onClick={() =>
+                        onCommand({ type: "approve-asset", assetId: asset.id })
+                      }
+                    >
+                      审核此版本
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    onClick={() =>
+                      onCommand({
+                        type: "revise-asset",
+                        assetId: asset.id,
+                        content: asset.content,
+                      })
+                    }
+                  >
+                    修订新版本
                   </Button>
                   <Button
                     variant="ghost"
@@ -531,6 +700,8 @@ export function ProjectPanel({
                       rollback: "阶段回退",
                       task: "任务更新",
                       evidence: "完成条件核实",
+                      issue: "问题核实",
+                      document: "交付文档",
                     }[decision.kind]
                   }
                 </strong>
@@ -554,6 +725,9 @@ export function ProjectPanel({
                         <small>
                           {stages.find((s) => s.id === id)?.name ||
                             project.tasks.find((t) => t.id === id)?.title ||
+                            project.issues?.find((issue) => issue.id === id)
+                              ?.question ||
+                            project.assets.find((a) => a.id === id)?.title ||
                             stages
                               .flatMap((s) => s.criteria)
                               .find((c) => c.id === id)?.title ||
@@ -572,7 +746,10 @@ export function ProjectPanel({
             <div className="wb-panel-title">
               <span className="wb-eyebrow">SPECIALIST SKILLS</span>
               <h2>专业方法库</h2>
-              <p>12 项独立能力，按需加载。系统推荐组合，你也可以调整。</p>
+              <p>
+                18 项通用能力，优先深化 6 个核心 Skills；P0 / P1
+                表示业务优先级，均已注册可调用。
+              </p>
             </div>
             {workSkills.map((skill, index) => (
               <button
@@ -582,8 +759,16 @@ export function ProjectPanel({
               >
                 <span>{String(index + 1).padStart(2, "0")}</span>
                 <div>
-                  <strong>{skill.name}</strong>
-                  <p>{skill.when}</p>
+                  <strong>
+                    {skill.name}{" "}
+                    <Badge tone={skill.core ? "info" : "neutral"}>
+                      {skill.core ? "核心 · " : ""}
+                      {skill.priority}
+                    </Badge>
+                  </strong>
+                  <p>
+                    {skill.group} · {skill.when}
+                  </p>
                   <small>产出：{skill.output}</small>
                 </div>
                 <ArrowRight size={14} />

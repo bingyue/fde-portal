@@ -1565,3 +1565,78 @@ span.wb-muted {
     transition: none !important;
   }
 }
+
+.wb-core-insights {
+  display: grid;
+  gap: 12px;
+  margin-block: 20px;
+  min-width: 0;
+}
+.wb-core-insights details {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--surface);
+  min-width: 0;
+}
+.wb-core-insights summary {
+  cursor: pointer;
+  font-weight: 600;
+  line-height: 1.7;
+}
+.wb-core-insights article {
+  padding-block: 14px;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+.wb-core-insights article:last-of-type {
+  border-bottom: 0;
+}
+.wb-core-insights p {
+  line-height: 1.7;
+  margin-block: 8px;
+}
+.wb-core-insights small {
+  color: var(--muted);
+  display: block;
+  line-height: 1.6;
+}
+.wb-evaluation-table {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+.wb-evaluation-table table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+}
+.wb-evaluation-table th,
+.wb-evaluation-table td {
+  text-align: left;
+  padding: 10px 8px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.wb-evaluation-table th:first-child {
+  min-width: 72px;
+}
+.wb-evaluation-table th:nth-child(2) {
+  min-width: 65px;
+}
+.wb-evaluation-table td:last-child {
+  min-width: 160px;
+}
+.wb-action-meta {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.7;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+.wb-action-meta > span {
+  display: inline-block;
+  margin-right: 12px;
+}
+.wb-action-meta p {
+  margin: 4px 0;
+}

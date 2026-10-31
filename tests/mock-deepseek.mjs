@@ -49,6 +49,89 @@ const server = createServer((request, response) => {
             },
           ],
         };
+        const skill =
+          payload.messages[0].content.match(/本次只执行 ([a-z-]+)/)?.[1];
+        result.actions = context.tasks.some(
+          (t) => t.title === result.actions[0].title && t.status !== "done",
+        )
+          ? []
+          : result.actions.map((a) => ({
+              ...a,
+              priority: "P0",
+              prerequisites: ["取得脱敏样本授权"],
+              skillId: "data-assessment",
+              dependsOnTaskIds: [],
+            }));
+        result.deliverables = [];
+        if (skill === "fde-interview-analyzer")
+          result.interview = {
+            businessGoals: ["验证业务效率改善空间"],
+            painPoints: ["流程基线待核实"],
+            unverifiedClaims: ["上线时间需评估"],
+            stakeholders: [],
+          };
+        if (skill === "fde-gap-finder")
+          result.gaps = [
+            {
+              topic: "baseline",
+              question: "请提供代表性业务样本及耗时记录？",
+              why: "先核实基线再定义验收指标",
+              askWho: "业务负责人",
+              priority: "P0",
+              sourceIds: [context.source.id],
+              ...(context.openIssues[0]
+                ? { issueId: context.openIssues[0].id }
+                : {}),
+            },
+          ];
+        if (skill === "fde-scenario-evaluator") {
+          const unknown = {
+            rating: null,
+            reason: "需要真实样本支持判断",
+            evidenceIds: [],
+          };
+          result.scenarioEvaluations = [
+            {
+              scenario: "业务流程 AI 辅助",
+              value: {
+                rating: 3,
+                reason: "资料描述业务痛点，价值仍需量化",
+                evidenceIds: [context.source.id],
+              },
+              technicalDifficulty: unknown,
+              dataReadiness: unknown,
+              organizationalResistance: unknown,
+              risk: unknown,
+              priority: "validate",
+              assumptions: ["样本可获得"],
+              nextValidation: "核对样本与业务基线",
+            },
+          ];
+        }
+        if (skill === "fde-stage-review")
+          result.stageReview = {
+            stage: context.stage.id,
+            criteria: context.stage.criteria.map((c) => ({
+              criterionId: c.id,
+              status: "missing",
+              evidenceIds: [],
+              reason: "等待人工核实与关联证据",
+            })),
+            blockers: context.gateBlockers,
+            advice: "stay",
+          };
+        if (skill === "fde-deliverable-builder")
+          result.deliverables = [
+            {
+              title: context.documentType,
+              content:
+                "# " +
+                context.documentType +
+                "\n\n## 已确认范围\n依据本次人工审批收集真实样本。\n\n## 行动\n1. 核实业务基线。\n2. 明确验收负责人。\n\n## 待核实\n数据授权与实际耗时。\n\n此内容仅用于自动化测试。",
+              sourceIds: [context.source.id],
+              decisionIds: [context.approval.id],
+            },
+          ];
         response.end(
           JSON.stringify({
             choices: [

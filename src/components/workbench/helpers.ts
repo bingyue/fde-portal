@@ -44,6 +44,8 @@ export function time(value: string) {
   });
 }
 export const statusLabels = {
+  queued: "等待前序",
+  skipped: "前序失败，已跳过",
   running: "执行中",
   completed: "已完成",
   failed: "执行失败",

@@ -184,7 +184,7 @@ export function WorkbenchApp() {
           <section className="wb-welcome-map" aria-label="企业 AI 项目全流程">
             <div className="wb-row wb-between">
               <span className="wb-eyebrow">THE FDE LIFECYCLE</span>
-              <span className="wb-muted">9 个阶段 · 12 项专业能力</span>
+              <span className="wb-muted">9 个阶段 · 18 项专业能力</span>
             </div>
             {stages.map((stage, i) => (
               <div className="wb-welcome-stage" key={stage.id}>

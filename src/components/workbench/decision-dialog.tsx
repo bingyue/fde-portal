@@ -9,6 +9,8 @@ import {
   type WorkProject,
 } from "@/lib/workbench/model";
 import type { Command } from "@/lib/workbench/engine";
+import { workSkills } from "@/lib/workbench/skills";
+import { documentTypes } from "@/lib/workbench/workflow";
 
 type WithoutAudit<T> = T extends unknown ? Omit<T, "actor" | "reason"> : never;
 export type DraftCommand = WithoutAudit<Command>;
@@ -25,6 +27,13 @@ export function DecisionDialog({
 }) {
   const [actor, setActor] = useState(project.owner);
   const [reason, setReason] = useState("");
+  const [generateDocument, setGenerateDocument] = useState(true);
+  const [documentType, setDocumentType] = useState<string>(
+    draft.type === "build-document" ? draft.documentType : "行动计划",
+  );
+  const [content, setContent] = useState(
+    draft.type === "revise-asset" ? draft.content : "",
+  );
   const [actions, setActions] = useState<SkillOutput["actions"]>(
     draft.type === "actions" ? draft.actions : [],
   );
@@ -43,9 +52,15 @@ export function DecisionDialog({
     advance: "确认阶段完成",
     rollback: "退回项目阶段",
     task: "更新任务状态",
+    issue: "核实开放问题",
+    "build-document": "生成交付文档",
+    "approve-asset": "审核交付文档",
+    "revise-asset": "修订为新版本",
   }[draft.type];
   const needsEvidence =
-    draft.type === "gate" || (draft.type === "task" && draft.status === "done");
+    draft.type === "gate" ||
+    (draft.type === "task" && draft.status === "done") ||
+    (draft.type === "issue" && draft.status === "resolved");
   const analysis =
     draft.type === "actions"
       ? project.analyses.find((item) => item.id === draft.analysisId)
@@ -58,7 +73,9 @@ export function DecisionDialog({
         ...draft,
         actor,
         reason,
-        ...(draft.type === "actions" ? { actions } : {}),
+        ...(draft.type === "actions" ? { actions, generateDocument } : {}),
+        ...(draft.type === "build-document" ? { documentType } : {}),
+        ...(draft.type === "revise-asset" ? { content } : {}),
         ...(needsEvidence ? { evidenceId } : {}),
       } as Command;
       await onSubmit(command);
@@ -74,7 +91,11 @@ export function DecisionDialog({
       open
       onClose={() => !busy && onClose()}
       title={title}
-      wide={draft.type === "actions"}
+      wide={
+        draft.type === "actions" ||
+        draft.type === "revise-asset" ||
+        draft.type === "approve-asset"
+      }
       description="每次判断都记录确认人、依据与时间，供后续追溯。"
     >
       <form
@@ -109,9 +130,8 @@ export function DecisionDialog({
         {draft.type === "actions" && (
           <>
             <p className="wb-muted">
-              可调整行动、负责人和阶段；确认后创建任务，并将{" "}
-              {analysis?.judgment?.deliverables.length || 0}{" "}
-              份草稿归档为交付资产。
+              可调整行动、负责人、前置依赖和推荐
+              Skill。确认后创建任务，文档由独立 Skill 基于确认结果生成。
             </p>
             {actions.map((action, index) => (
               <div className="wb-action-edit" key={index}>
@@ -173,6 +193,109 @@ export function DecisionDialog({
                     </Select>
                   </Field>
                 </div>
+                <div className="wb-two">
+                  <Field label="行动优先级">
+                    <Select
+                      value={action.priority || "P1"}
+                      onChange={(e) =>
+                        setActions(
+                          actions.map((a, i) =>
+                            i === index
+                              ? {
+                                  ...a,
+                                  priority: e.target.value as
+                                    "P0" | "P1" | "P2",
+                                }
+                              : a,
+                          ),
+                        )
+                      }
+                    >
+                      <option value="P0">P0 · 必须优先核实</option>
+                      <option value="P1">P1 · 影响实施路径</option>
+                      <option value="P2">P2 · 后续优化</option>
+                    </Select>
+                  </Field>
+                  <Field label="对应 Skill">
+                    <Select
+                      value={action.skillId || ""}
+                      onChange={(e) =>
+                        setActions(
+                          actions.map((a, i) =>
+                            i === index
+                              ? { ...a, skillId: e.target.value || undefined }
+                              : a,
+                          ),
+                        )
+                      }
+                    >
+                      <option value="">由负责人判断</option>
+                      {workSkills
+                        .filter((s) => s.id !== "fde-deliverable-builder")
+                        .map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name}
+                          </option>
+                        ))}
+                    </Select>
+                  </Field>
+                </div>
+                <Field label="业务前置条件（每行一项）">
+                  <Textarea
+                    value={(action.prerequisites || []).join("\n")}
+                    onChange={(e) =>
+                      setActions(
+                        actions.map((a, i) =>
+                          i === index
+                            ? {
+                                ...a,
+                                prerequisites: e.target.value
+                                  .split("\n")
+                                  .filter(Boolean)
+                                  .slice(0, 8),
+                              }
+                            : a,
+                        ),
+                      )
+                    }
+                  />
+                </Field>
+                {project.tasks.length > 0 && (
+                  <details>
+                    <summary>关联前置任务</summary>
+                    {project.tasks.map((task) => (
+                      <label key={task.id} className="wb-check">
+                        <input
+                          type="checkbox"
+                          checked={
+                            action.dependsOnTaskIds?.includes(task.id) || false
+                          }
+                          onChange={(e) =>
+                            setActions(
+                              actions.map((a, i) =>
+                                i === index
+                                  ? {
+                                      ...a,
+                                      dependsOnTaskIds: e.target.checked
+                                        ? [
+                                            ...(a.dependsOnTaskIds || []),
+                                            task.id,
+                                          ]
+                                        : (a.dependsOnTaskIds || []).filter(
+                                            (id) => id !== task.id,
+                                          ),
+                                    }
+                                  : a,
+                              ),
+                            )
+                          }
+                        />
+                        {task.title} ·{" "}
+                        {task.status === "done" ? "已完成" : "未完成"}
+                      </label>
+                    ))}
+                  </details>
+                )}
                 <div className="wb-row">
                   <label className="wb-check">
                     <input
@@ -221,7 +344,60 @@ export function DecisionDialog({
             >
               添加行动
             </Button>
+            {analysis?.protocolVersion === 2 && (
+              <label className="wb-check">
+                <input
+                  type="checkbox"
+                  checked={generateDocument}
+                  onChange={(e) => setGenerateDocument(e.target.checked)}
+                />
+                确认后调用交付资产 Skill 生成行动计划草稿（使用 DeepSeek）
+              </label>
+            )}
           </>
+        )}
+        {draft.type === "build-document" && (
+          <Field label="文档类型">
+            <Select
+              value={documentType}
+              onChange={(e) => setDocumentType(e.target.value)}
+            >
+              {documentTypes.map((type) => (
+                <option key={type}>{type}</option>
+              ))}
+            </Select>
+          </Field>
+        )}
+        {draft.type === "approve-asset" && (
+          <>
+            <p className="wb-note">
+              请核对全文的事实、来源与完成状态。审核后此版本可作为阶段证据。
+            </p>
+            <pre className="wb-document">
+              {project.assets.find((a) => a.id === draft.assetId)?.content}
+            </pre>
+          </>
+        )}
+        {draft.type === "revise-asset" && (
+          <Field label="修订正文" hint="保存为新的待审核版本，历史正文保留。">
+            <Textarea
+              required
+              minLength={10}
+              maxLength={10000}
+              rows={16}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+            />
+          </Field>
+        )}
+        {draft.type === "issue" && (
+          <p className="wb-note">
+            {project.issues?.find((i) => i.id === draft.issueId)?.question}
+            <br />
+            {draft.status === "resolved"
+              ? "关闭问题需要可核实的证据。"
+              : "重新打开或调整优先级将记录理由；重新打开已通过阶段的 P0 问题会退回该阶段。"}
+          </p>
         )}
         {needsEvidence && (
           <Field

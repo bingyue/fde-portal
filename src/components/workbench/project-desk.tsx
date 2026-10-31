@@ -27,10 +27,12 @@ import {
   type WorkProject,
 } from "@/lib/workbench/model";
 import type { Command } from "@/lib/workbench/engine";
-import { routeSkills, workSkills } from "@/lib/workbench/skills";
+import { routeSkills, workSkills, skillName } from "@/lib/workbench/skills";
+import { documentTypes } from "@/lib/workbench/workflow";
 import { api, download, statusLabels, time } from "./helpers";
 import { DecisionDialog, type DraftCommand } from "./decision-dialog";
 import { ProjectPanel, type Panel } from "./project-panel";
+import { CoreInsights, ActionMetadata } from "./core-insights";
 
 export function ProjectDesk({
   project,
@@ -131,7 +133,22 @@ export function ProjectDesk({
       setStage(result.project.currentStage);
       if (value.type === "actions") {
         setPanel("tasks");
-        setNotice("行动已写入任务，交付物已归档。当前阶段仍需单独确认。");
+        setNotice(
+          "行动已写入任务；确认后的文档在资产区生成并等待审核。阶段仍需单独确认。",
+        );
+      } else if (value.type === "task" && value.status === "done") {
+        const followup = result.project.analyses.find(
+          (a) => a.trigger === "task.completed" && a.status === "running",
+        );
+        if (followup) setAnalysisId(followup.id);
+        setNotice(
+          "任务已完成，正在根据最新项目记忆复查下一步；有分析运行时会排队执行。",
+        );
+      } else if (
+        ["build-document", "approve-asset", "revise-asset"].includes(value.type)
+      ) {
+        setPanel("assets");
+        setNotice("文档操作已记录，待审核草稿不能作为阶段证据。");
       } else setNotice("判断已保存，可在决策记录中追溯。");
     } catch (e) {
       const current = await api<{ project: WorkProject }>(
@@ -471,27 +488,33 @@ export function ProjectDesk({
               </div>
               {showSkills && (
                 <div className="wb-skill-picker">
-                  <p>按资料关键词与当前阶段推荐；可手动选择最多 3 项。</p>
+                  <p>
+                    可指定最多 3
+                    项专业分析；系统按依赖补齐信息提取、缺口、阶段检查与行动规划。
+                  </p>
                   <div>
-                    {workSkills.map((skill) => (
-                      <label key={skill.id} title={skill.when}>
-                        <input
-                          type="checkbox"
-                          checked={skillIds.includes(skill.id)}
-                          disabled={
-                            !skillIds.includes(skill.id) && skillIds.length >= 3
-                          }
-                          onChange={(e) =>
-                            setSkillIds(
-                              e.target.checked
-                                ? [...skillIds, skill.id]
-                                : skillIds.filter((id) => id !== skill.id),
-                            )
-                          }
-                        />
-                        {skill.name}
-                      </label>
-                    ))}
+                    {workSkills
+                      .filter((skill) => skill.id !== "fde-deliverable-builder")
+                      .map((skill) => (
+                        <label key={skill.id} title={skill.when}>
+                          <input
+                            type="checkbox"
+                            checked={skillIds.includes(skill.id)}
+                            disabled={
+                              !skillIds.includes(skill.id) &&
+                              skillIds.length >= 3
+                            }
+                            onChange={(e) =>
+                              setSkillIds(
+                                e.target.checked
+                                  ? [...skillIds, skill.id]
+                                  : skillIds.filter((id) => id !== skill.id),
+                              )
+                            }
+                          />
+                          {skill.name}
+                        </label>
+                      ))}
                   </div>
                   <Button variant="ghost" onClick={() => setSkillIds([])}>
                     恢复自动推荐
@@ -508,13 +531,13 @@ export function ProjectDesk({
               <div className="wb-composer-submit">
                 <div>
                   <span className="wb-label">
-                    {skillIds.length ? "本轮指定" : "推荐组合"}
+                    {skillIds.length
+                      ? "本轮执行链（含必要步骤）"
+                      : "推荐执行链"}
                   </span>
                   <div className="wb-inline-skills">
                     {recommended.map((id) => (
-                      <span key={id}>
-                        {workSkills.find((s) => s.id === id)?.name}
-                      </span>
+                      <span key={id}>{skillName(id)}</span>
                     ))}
                   </div>
                 </div>
@@ -626,7 +649,7 @@ export function ProjectDesk({
                           ) : (
                             "!"
                           )}
-                          {workSkills.find((s) => s.id === run.skillId)?.name}
+                          {skillName(run.skillId)}
                         </span>
                         <small>{statusLabels[run.status]}</small>
                       </summary>
@@ -635,7 +658,11 @@ export function ProjectDesk({
                       ) : run.output ? (
                         <p>{run.output.summary}</p>
                       ) : (
-                        <p>正在调用 DeepSeek，完成后自动保存到项目。</p>
+                        <p>
+                          {run.status === "queued"
+                            ? `等待前序结果：${(run.dependsOn || []).map(skillName).join("、") || "准备开始"}`
+                            : "正在调用 DeepSeek，完成后自动保存到项目。"}
+                        </p>
                       )}
                     </details>
                   ))}
@@ -646,13 +673,35 @@ export function ProjectDesk({
                     <Button
                       variant="secondary"
                       disabled={busy || running}
-                      onClick={() => void analyze(active.sourceId)}
+                      onClick={() =>
+                        active.purpose === "deliverable"
+                          ? setDraft({
+                              type: "build-document",
+                              documentType:
+                                documentTypes.find(
+                                  (t) => t === active.documentType,
+                                ) || "行动计划",
+                            })
+                          : void analyze(active.sourceId)
+                      }
                     >
                       重试本轮资料
                     </Button>
                   </div>
                 )}
-                {active.judgment && (
+                {active.purpose === "deliverable" &&
+                  active.status === "completed" && (
+                    <div className="wb-note">
+                      交付草稿已生成。请在资产区核对正文，审核后才可作为项目证据。
+                      <Button
+                        variant="secondary"
+                        onClick={() => setPanel("assets")}
+                      >
+                        查看并审核文档
+                      </Button>
+                    </div>
+                  )}
+                {active.judgment && active.purpose !== "deliverable" && (
                   <>
                     <div className="wb-verdict">
                       <span className="wb-label">AI 建议 · 等待你的判断</span>
@@ -775,6 +824,7 @@ export function ProjectDesk({
                         </Button>
                       </div>
                     )}
+                    <CoreInsights analysis={active} project={project} />
                     <div className="wb-gaps">
                       <div>
                         <h3>信息缺口</h3>
@@ -817,6 +867,7 @@ export function ProjectDesk({
                           <span>{index + 1}</span>
                           <div>
                             <strong>{action.title}</strong>
+                            <ActionMetadata action={action} project={project} />
                             <small>
                               {action.owner} ·{" "}
                               {stages.find((s) => s.id === action.stage)?.name}

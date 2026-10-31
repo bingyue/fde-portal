@@ -141,6 +141,11 @@ describe("FDE Workbench human decisions and stage gates", () => {
       evidenceId: "source-1",
       ...audit,
     });
+    expect(p.analyses[0].trigger).toBe("task.completed");
+    expect(() => applyCommand(p, { type: "advance", ...audit })).toThrow(
+      "等待当前分析",
+    );
+    p.analyses[0].status = "completed";
     p = applyCommand(p, { type: "advance", ...audit });
     expect(p.currentStage).toBe("interview");
     expect(p.completedStages).toEqual(["launch"]);
@@ -259,12 +264,20 @@ describe("FDE Workbench human decisions and stage gates", () => {
   });
   it("routes only registered skills, respects user choices, limits fan-out", () => {
     expect(routeSkills("访谈：生产排产与数据质量问题", "launch")).toEqual([
-      "interview-analysis",
+      "fde-interview-analyzer",
       "process-diagnosis",
       "data-assessment",
+      "fde-gap-finder",
+      "fde-scenario-evaluator",
+      "fde-stage-review",
+      "fde-next-action",
     ]);
     expect(routeSkills("访谈记录", "launch", ["roi-analysis"])).toEqual([
+      "fde-interview-analyzer",
       "roi-analysis",
+      "fde-gap-finder",
+      "fde-stage-review",
+      "fde-next-action",
     ]);
     expect(() => routeSkills("", "launch", ["../../other"])).toThrow();
   });

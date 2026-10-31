@@ -27,7 +27,7 @@ export const stages: {
       { id: "brief", title: "业务问题、目标与初步边界已确认" },
       { id: "sponsor", title: "项目负责人和业务决策人已明确" },
     ],
-    skills: ["requirement-understanding", "fde-questioning"],
+    skills: ["requirement-understanding", "fde-gap-finder"],
   },
   {
     id: "interview",
@@ -37,7 +37,7 @@ export const stages: {
       { id: "stakeholders", title: "关键干系人诉求和冲突已核实" },
       { id: "as-is", title: "现有业务流程已有具体样本支撑" },
     ],
-    skills: ["interview-analysis", "process-diagnosis", "fde-questioning"],
+    skills: ["fde-interview-analyzer", "process-diagnosis", "fde-gap-finder"],
   },
   {
     id: "diagnosis",
@@ -57,7 +57,7 @@ export const stages: {
       { id: "baseline", title: "业务基线和目标指标有证据" },
       { id: "roi", title: "收益、成本假设和停止条件经业务方确认" },
     ],
-    skills: ["value-assessment", "roi-analysis"],
+    skills: ["fde-scenario-evaluator", "roi-analysis"],
   },
   {
     id: "solution",
@@ -67,7 +67,12 @@ export const stages: {
       { id: "architecture", title: "最小闭环、系统集成与数据流已评审" },
       { id: "boundary", title: "人机责任、安全边界和降级方案已确认" },
     ],
-    skills: ["technical-design", "data-assessment", "poc-planning"],
+    skills: [
+      "technical-design",
+      "solution-builder",
+      "data-assessment",
+      "poc-planning",
+    ],
   },
   {
     id: "poc",
@@ -87,7 +92,7 @@ export const stages: {
       { id: "trial", title: "试点结果与业务指标已验证" },
       { id: "adoption", title: "用户采纳、培训与操作规范有证据" },
     ],
-    skills: ["project-evaluation", "value-assessment"],
+    skills: ["project-evaluation", "fde-scenario-evaluator"],
   },
   {
     id: "production",
@@ -97,7 +102,7 @@ export const stages: {
       { id: "security", title: "权限、安全和运行监控已检查" },
       { id: "rollback", title: "灰度、回滚与责任人已演练确认" },
     ],
-    skills: ["technical-design", "delivery-acceptance"],
+    skills: ["operations-readiness", "risk-diagnosis", "fde-stage-review"],
   },
   {
     id: "acceptance",
@@ -107,7 +112,7 @@ export const stages: {
       { id: "signoff", title: "业务方签署验收结论与遗留问题清单" },
       { id: "handover", title: "运维交接、责任人和持续运营指标已确认" },
     ],
-    skills: ["delivery-acceptance", "roi-analysis"],
+    skills: ["fde-stage-review", "operations-readiness", "roi-analysis"],
   },
 ];
 
@@ -129,6 +134,10 @@ export interface Fact {
   confirmedAt?: string;
 }
 export interface Task {
+  priority?: "P0" | "P1" | "P2";
+  prerequisites?: string[];
+  skillId?: string;
+  dependsOnTaskIds?: string[];
   id: string;
   title: string;
   owner: string;
@@ -140,6 +149,9 @@ export interface Task {
   completionNote?: string;
 }
 export interface Asset {
+  decisionIds?: string[];
+  reviewStatus?: "draft" | "approved";
+  approvalId?: string;
   id: string;
   title: string;
   content: string;
@@ -152,7 +164,15 @@ export interface Asset {
 }
 export interface Decision {
   id: string;
-  kind: "fact" | "action" | "stage" | "rollback" | "task" | "evidence";
+  kind:
+    | "fact"
+    | "action"
+    | "stage"
+    | "rollback"
+    | "task"
+    | "evidence"
+    | "issue"
+    | "document";
   actor: string;
   reason: string;
   outcome?: string;
@@ -168,13 +188,20 @@ export interface GateEvidence {
 }
 export interface SkillRun {
   skillId: string;
-  status: "running" | "completed" | "failed";
+  status: "queued" | "running" | "completed" | "failed" | "skipped";
+  dependsOn?: string[];
+  phase?: number;
   startedAt: string;
   completedAt?: string;
   error?: string;
   output?: SkillOutput;
 }
 export interface Analysis {
+  protocolVersion?: 2;
+  purpose?: "analysis" | "deliverable";
+  approvalId?: string;
+  documentType?: string;
+  trigger?: "source.analyzed" | "task.completed" | "approval.recorded";
   id: string;
   sourceId: string;
   stage: StageId;
@@ -190,6 +217,8 @@ export interface Analysis {
   actor?: string;
 }
 export interface WorkProject {
+  pendingTaskReview?: boolean;
+  issues?: ProjectIssue[];
   id: string;
   name: string;
   organization: string;
@@ -211,7 +240,100 @@ export interface WorkProject {
   legacyId?: string;
 }
 const short = z.string().trim().min(1).max(1200);
+export const actionSchema = z.object({
+  title: z.string().trim().min(2).max(300),
+  owner: z.string().trim().min(1).max(100),
+  stage: z.enum(stageIds),
+  blocking: z.boolean(),
+  priority: z.enum(["P0", "P1", "P2"]).optional(),
+  prerequisites: z.array(short).max(8).optional(),
+  skillId: z.string().max(80).optional(),
+  dependsOnTaskIds: z.array(z.string().max(80)).max(12).optional(),
+});
+export const gapSchema = z.object({
+  topic: z.enum([
+    "goal",
+    "process",
+    "baseline",
+    "data",
+    "authority",
+    "resources",
+    "acceptance",
+    "adoption",
+    "risk",
+    "other",
+  ]),
+  question: short,
+  why: short,
+  askWho: z.string().trim().min(1).max(100),
+  priority: z.enum(["P0", "P1", "P2"]),
+  sourceIds: z.array(z.string().max(80)).min(1).max(10),
+  issueId: z.string().max(80).optional(),
+});
+export type ProjectIssue = z.infer<typeof gapSchema> & {
+  id: string;
+  stage?: StageId;
+  status: "open" | "resolved";
+  analysisIds: string[];
+  createdAt: string;
+  updatedAt: string;
+  evidenceId?: string;
+  resolution?: string;
+  resolvedBy?: string;
+};
+const dimension = z.object({
+  rating: z.number().int().min(1).max(5).nullable(),
+  reason: short,
+  evidenceIds: z.array(z.string().max(80)).max(10),
+});
+export const scenarioEvaluationSchema = z.object({
+  scenario: short,
+  value: dimension,
+  technicalDifficulty: dimension,
+  dataReadiness: dimension,
+  organizationalResistance: dimension,
+  risk: dimension,
+  priority: z.enum(["validate", "candidate", "defer"]),
+  assumptions: z.array(short).max(8),
+  nextValidation: short,
+});
+export const stageReviewSchema = z.object({
+  stage: z.enum(stageIds),
+  criteria: z
+    .array(
+      z.object({
+        criterionId: z.string().max(80),
+        status: z.enum(["supported", "missing", "conflict"]),
+        evidenceIds: z.array(z.string().max(80)).max(10),
+        reason: short,
+      }),
+    )
+    .max(12),
+  blockers: z.array(short).max(20),
+  advice: z.enum(["stay", "review-ready"]),
+});
 export const skillOutputSchema = z.object({
+  interview: z
+    .object({
+      businessGoals: z.array(short).max(10),
+      painPoints: z.array(short).max(10),
+      unverifiedClaims: z.array(short).max(12),
+      stakeholders: z
+        .array(
+          z.object({
+            name: z.string().max(100),
+            role: z.string().max(100),
+            claim: short,
+            sourceId: z.string().max(80),
+            quote: short,
+          }),
+        )
+        .max(12),
+    })
+    .optional(),
+  gaps: z.array(gapSchema).max(12).optional(),
+  scenarioEvaluations: z.array(scenarioEvaluationSchema).max(6).optional(),
+  stageReview: stageReviewSchema.optional(),
   summary: short,
   facts: z
     .array(
@@ -222,28 +344,23 @@ export const skillOutputSchema = z.object({
   contradictions: z.array(short).max(8),
   recommendation: short,
   suggestedStage: z.enum(stageIds),
-  actions: z
-    .array(
-      z.object({
-        title: z.string().trim().min(1).max(300),
-        owner: z.string().trim().min(1).max(100),
-        stage: z.enum(stageIds),
-        blocking: z.boolean(),
-      }),
-    )
-    .max(6),
+  actions: z.array(actionSchema).max(6),
   deliverables: z
     .array(
       z.object({
         title: z.string().trim().min(1).max(200),
         content: z.string().trim().min(1).max(10000),
+        sourceIds: z.array(z.string().max(80)).max(20).optional(),
+        decisionIds: z.array(z.string().max(80)).max(20).optional(),
       }),
     )
-    .min(1)
     .max(3),
 });
 export type SkillOutput = z.infer<typeof skillOutputSchema>;
 export interface Judgment {
+  stageReview?: z.infer<typeof stageReviewSchema>;
+  scenarioEvaluations?: z.infer<typeof scenarioEvaluationSchema>[];
+  ruleBlockers?: string[];
   summary: string;
   missing: string[];
   contradictions: string[];
@@ -262,10 +379,12 @@ export function evidenceOptions(project: WorkProject) {
     ...project.facts
       .filter((fact) => fact.status === "confirmed")
       .map((fact) => ({ id: fact.id, title: `已确认事实 · ${fact.text}` })),
-    ...project.assets.map((asset) => ({
-      id: asset.id,
-      title: `交付资产 · ${asset.title} v${asset.version}`,
-    })),
+    ...project.assets
+      .filter((asset) => asset.reviewStatus !== "draft")
+      .map((asset) => ({
+        id: asset.id,
+        title: `交付资产 · ${asset.title} v${asset.version}`,
+      })),
   ];
 }
 export function gateBlockers(
@@ -289,6 +408,12 @@ export function gateBlockers(
     .map((criterion) => criterion.title);
   return [
     ...missing,
+    ...(project.issues || [])
+      .filter(
+        (i) =>
+          i.status === "open" && i.priority === "P0" && i.stage === stageId,
+      )
+      .map((i) => `关键问题未核实：${i.question}`),
     ...project.tasks
       .filter(
         (task) =>
@@ -347,7 +472,12 @@ export function projectMarkdown(project: WorkProject) {
     "## 当前任务",
     ...project.tasks.map(
       (t) =>
-        `- [${t.status === "done" ? "x" : " "}] ${t.title} · ${t.owner} · ${stages.find((s) => s.id === t.stage)!.name}`,
+        `- [${t.status === "done" ? "x" : " "}] ${t.title} · ${t.owner} · ${stages.find((s) => s.id === t.stage)!.name} · ${t.priority || "未分级"}\n  前置条件：${t.prerequisites?.join("；") || "无"}\n  依赖任务：${t.dependsOnTaskIds?.map((id) => project.tasks.find((task) => task.id === id)?.title || id).join("；") || "无"}\n  完成证据：${t.evidenceId || "待补充"}`,
+    ),
+    "## 项目问题与信息缺口",
+    ...(project.issues || []).map(
+      (i) =>
+        `- ${i.priority} · ${i.status === "resolved" ? "已核实关闭" : "开放"}：${i.question}\n  原因：${i.why}\n  应该问：${i.askWho}\n  来源：${i.sourceIds.join("、")}\n  核实记录：${i.resolution || "待核实"} · ${i.evidenceId || "无证据"}`,
     ),
     "## 决策记录",
     ...project.decisions.map(
@@ -355,6 +485,9 @@ export function projectMarkdown(project: WorkProject) {
         `- ${d.at} · ${d.actor} · ${d.kind}：${d.outcome || ""}\n  依据：${d.reason}（${d.references.join("、")}）`,
     ),
     "## 交付资产",
-    ...project.assets.map((a) => `### ${a.title} v${a.version}\n${a.content}`),
+    ...project.assets.map(
+      (a) =>
+        `### ${a.title} v${a.version} · ${a.reviewStatus === "draft" ? "待审核草稿" : "已审核"}\n来源：${a.sourceIds.join("、")}\n审批：${a.decisionIds?.join("、") || a.approvalId || a.approvedBy}\n\n${a.content}`,
+    ),
   ].join("\n\n");
 }

@@ -4,7 +4,7 @@ import { beginAnalysis, runAnalysis } from "@/lib/workbench/runner";
 import { apiError, requestBody, revisionSchema } from "@/lib/workbench/http";
 
 export const runtime = "nodejs";
-export const maxDuration = 180;
+export const maxDuration = 600;
 const schema = z.object({
   revision: revisionSchema,
   sourceId: z.string().uuid(),
