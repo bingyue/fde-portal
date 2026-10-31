@@ -1,5 +1,7 @@
 "use client";
 
+import { appPath } from "@/lib/app-path";
+
 import {
   AlertTriangle,
   CheckCircle2,
@@ -96,7 +98,7 @@ export default function SkillsPage() {
     if (!selected) return;
     setError("");
     setTask(null);
-    const response = await fetch("/api/skills/tasks", {
+    const response = await fetch(appPath("/api/skills/tasks"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ skillId: selected.id, input: taskInput }),
@@ -109,7 +111,7 @@ export default function SkillsPage() {
     setTask(body.task);
     for (let attempt = 0; attempt < 120; attempt += 1) {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      const poll = await fetch(`/api/skills/tasks/${body.task.id}`, {
+      const poll = await fetch(appPath(`/api/skills/tasks/${body.task.id}`), {
         cache: "no-store",
       });
       if (!poll.ok) {
@@ -283,7 +285,7 @@ export default function SkillsPage() {
               </div>
               <div className="flex flex-row gap-2 sm:flex-col">
                 <a
-                  href={selected.downloadUrl}
+                  href={appPath(selected.downloadUrl)}
                   download
                   className="inline-flex min-h-9 items-center justify-center gap-2 rounded-[var(--radius-sm)] border border-[var(--primary)] bg-[var(--primary)] px-3.5 py-2 text-xs font-semibold text-white hover:bg-[var(--primary-hover)] dark:text-[#071426]"
                 >

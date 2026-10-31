@@ -1,5 +1,7 @@
 "use client";
 
+import { appPath } from "@/lib/app-path";
+
 import {
   createContext,
   useCallback,
@@ -339,7 +341,7 @@ export function PortalProvider({ children }: { children: React.ReactNode }) {
         notify("场景卡草稿已保存");
       },
       generateScenario: async (answers) => {
-        const response = await fetch("/api/ai/scenario", {
+        const response = await fetch(appPath("/api/ai/scenario"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ answers }),

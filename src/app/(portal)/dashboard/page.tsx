@@ -1,5 +1,7 @@
 "use client";
 
+import { appPath } from "@/lib/app-path";
+
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -27,7 +29,7 @@ export default function DashboardPage() {
   const { state } = usePortal();
   const [aiConfigured, setAiConfigured] = useState(false);
   useEffect(() => {
-    void fetch("/api/ai/config", { cache: "no-store" })
+    void fetch(appPath("/api/ai/config"), { cache: "no-store" })
       .then((response) => response.json())
       .then((data: { configured?: boolean }) =>
         setAiConfigured(Boolean(data.configured)),

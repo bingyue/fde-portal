@@ -1,5 +1,7 @@
 "use client";
 
+import { appPath } from "@/lib/app-path";
+
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -64,7 +66,7 @@ export default function ChatPage() {
     : 0;
 
   useEffect(() => {
-    void fetch("/api/ai/config", { cache: "no-store" })
+    void fetch(appPath("/api/ai/config"), { cache: "no-store" })
       .then((response) => {
         if (!response.ok) throw new Error();
         return response.json();
@@ -123,7 +125,7 @@ export default function ChatPage() {
     const aborter = new AbortController();
     controller.current = aborter;
     try {
-      const response = await fetch("/api/ai/diagnosis", {
+      const response = await fetch(appPath("/api/ai/diagnosis"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: aborter.signal,

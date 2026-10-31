@@ -1,4 +1,5 @@
 import type { WorkProject } from "@/lib/workbench/model";
+import { appPath } from "@/lib/app-path";
 
 export type ProjectSummary = Pick<
   WorkProject,
@@ -12,7 +13,7 @@ export type ProjectSummary = Pick<
 >;
 export async function api<T>(url: string, body?: unknown): Promise<T> {
   const response = await fetch(
-    url,
+    appPath(url),
     body === undefined
       ? { cache: "no-store" }
       : {

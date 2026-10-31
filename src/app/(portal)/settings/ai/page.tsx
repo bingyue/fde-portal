@@ -1,5 +1,7 @@
 "use client";
 
+import { appPath } from "@/lib/app-path";
+
 import {
   AlertTriangle,
   CheckCircle2,
@@ -53,7 +55,9 @@ export default function AISettingsPage() {
   const loadStatus = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/ai/config", { cache: "no-store" });
+      const response = await fetch(appPath("/api/ai/config"), {
+        cache: "no-store",
+      });
       const data = (await response.json()) as AIStatus;
       setStatus(data);
       setBaseUrl(data.baseUrl);
@@ -96,7 +100,7 @@ export default function AISettingsPage() {
     setSaving(true);
     setMessage(null);
     try {
-      const response = await fetch("/api/ai/config", {
+      const response = await fetch(appPath("/api/ai/config"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ apiKey, baseUrl, model }),
@@ -121,7 +125,9 @@ export default function AISettingsPage() {
   };
 
   const disconnect = async () => {
-    const response = await fetch("/api/ai/config", { method: "DELETE" });
+    const response = await fetch(appPath("/api/ai/config"), {
+      method: "DELETE",
+    });
     const data = (await response.json()) as { error?: string };
     if (!response.ok) {
       setMessage({ tone: "error", text: data.error || "无法移除配置" });
