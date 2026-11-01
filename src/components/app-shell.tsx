@@ -1,30 +1,11 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
 import {
-  Activity,
-  Archive,
-  Blocks,
-  BookOpen,
-  BriefcaseBusiness,
-  CheckSquare2,
   CircleUserRound,
-  Compass,
-  FileCheck2,
-  FileText,
-  FlaskConical,
-  Gauge,
-  Home,
-  KeyRound,
+  ChevronRight,
   Menu,
-  MessagesSquare,
   Search,
   Settings2,
-  ShieldCheck,
-  Sparkles,
-  RadioTower,
-  UsersRound,
-  Workflow,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -33,37 +14,7 @@ import { useState } from "react";
 import { PortalProvider, usePortal } from "@/lib/store";
 import { ThemeSelector } from "./theme-provider";
 import { Badge } from "./ui";
-
-type NavItem = readonly [href: string, label: string, Icon: LucideIcon];
-
-const deliveryManagement = [
-  ["/workbench", "FDE 全流程工作台", Workflow],
-  ["/chat", "AI 场景诊断", MessagesSquare],
-  ["/dashboard", "我的工作台", Home],
-  ["/projects/new", "项目中心", BriefcaseBusiness],
-  ["/reviews", "待办与评审", CheckSquare2],
-] as const satisfies readonly NavItem[];
-
-const capabilities = [
-  ["/learn", "学习中心", BookOpen],
-  ["/templates", "模板中心", Blocks],
-  ["/project/assets", "资产中心", Archive],
-  ["/skills", "Skill 中心", Workflow],
-  ["/settings/ai", "AI 模型配置", KeyRound],
-  ["/team", "使用设置", UsersRound],
-] as const satisfies readonly NavItem[];
-
-const project = [
-  ["/project/overview", "项目总览", Gauge],
-  ["/project/discovery", "结果与发现", Compass],
-  ["/project/scenario", "场景卡", FileText],
-  ["/project/experiments", "假设与实验", FlaskConical],
-  ["/project/poc", "证据门禁", Activity],
-  ["/project/evals", "Eval 中心", ShieldCheck],
-  ["/project/operations", "采纳与运营", RadioTower],
-  ["/project/assets", "AI 资产库", Sparkles],
-  ["/project/reports", "报告与验收", FileCheck2],
-] as const satisfies readonly NavItem[];
+import { PortalNavigation, portalLocation } from "./portal-navigation";
 
 function ShellContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -83,49 +34,19 @@ function ShellContent({ children }: { children: React.ReactNode }) {
     (item) => item.status === "待评审",
   ).length;
 
-  const navItem = ([href, label, Icon]: NavItem) => {
-    const active = pathname === href;
-    return (
-      <Link
-        key={href}
-        href={href}
-        onClick={() => setMobileOpen(false)}
-        className={`group mx-3 flex h-10 items-center gap-3 rounded-[var(--radius-sm)] px-3 text-[13px] font-medium transition ${
-          active
-            ? "bg-[var(--primary-soft)] text-[var(--primary-ink)]"
-            : "text-[var(--sidebar-ink)] hover:bg-[var(--surface-hover)] hover:text-[var(--ink)]"
-        }`}
-      >
-        <Icon
-          size={16}
-          className={
-            active
-              ? "text-[var(--primary)]"
-              : "text-[var(--sidebar-muted)] group-hover:text-[var(--primary)]"
-          }
-        />
-        <span className="truncate">{label}</span>
-        {label === "待办与评审" && pendingReviews > 0 && (
-          <span className="font-data ml-auto rounded-full bg-[var(--primary)] px-1.5 text-[10px] font-bold text-white">
-            {pendingReviews}
-          </span>
-        )}
-      </Link>
-    );
-  };
-
-  const groupLabel = (label: string) => (
-    <p className="px-6 pb-2 pt-4 text-[9px] font-bold uppercase tracking-[.2em] text-[var(--sidebar-muted)]">
-      {label}
-    </p>
-  );
+  const location = portalLocation(pathname);
 
   return (
     <div className="min-h-screen bg-[var(--paper)]">
       <aside
-        className={`portal-sidebar fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col border-r border-[var(--line)] bg-[var(--sidebar)] text-[var(--sidebar-ink)] shadow-[4px_0_18px_rgba(15,23,42,0.025)] transition-transform duration-300 ${mobileOpen ? "!translate-x-0" : ""}`}
+        id="portal-sidebar"
+        data-open={mobileOpen}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") setMobileOpen(false);
+        }}
+        className="portal-sidebar fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col border-r border-[var(--line)] bg-[var(--sidebar)] text-[var(--sidebar-ink)] shadow-[4px_0_18px_rgba(15,23,42,0.025)] transition-transform duration-300"
       >
-        <div className="flex h-[68px] items-center justify-between border-b border-[var(--line)] px-5">
+        <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-[var(--line)] px-5">
           <Link href="/workbench" className="flex items-center gap-3">
             <span className="grid size-9 place-items-center rounded-[var(--radius-md)] bg-[var(--primary)] text-sm font-black text-white shadow-sm">
               F
@@ -148,24 +69,16 @@ function ShellContent({ children }: { children: React.ReactNode }) {
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-1">
-          {groupLabel("交付管理")}
-          {deliveryManagement.map(navItem)}
-          {groupLabel("能力与治理")}
-          {capabilities.map(navItem)}
-          {isProject && state.project.id && (
-            <>
-              <div className="mx-5 mt-4 border-t border-[var(--line)]" />
-              {groupLabel("当前项目")}
-              <p className="mb-2 truncate px-6 text-[11px] font-semibold text-[var(--ink)]">
-                {state.project.name}
-              </p>
-              {project.map(navItem)}
-            </>
-          )}
-        </nav>
+        <PortalNavigation
+          pathname={pathname}
+          projectName={
+            isProject && state.project.id ? state.project.name : undefined
+          }
+          pendingReviews={pendingReviews}
+          onNavigate={() => setMobileOpen(false)}
+        />
 
-        <div className="border-t border-[var(--line)] p-4">
+        <div className="shrink-0 border-t border-[var(--line)] p-4">
           <div className="mb-3 flex items-center gap-2 text-[11px] text-[var(--sidebar-muted)]">
             <span className="signal-pulse size-2 rounded-full bg-[var(--success)]" />
             项目数据保存在本机浏览器
@@ -195,16 +108,26 @@ function ShellContent({ children }: { children: React.ReactNode }) {
               className="mobile-nav hidden rounded-[var(--radius-sm)] p-2 text-[var(--muted)] hover:bg-[var(--surface-hover)]"
               onClick={() => setMobileOpen(true)}
               aria-label="打开导航"
+              aria-expanded={mobileOpen}
+              aria-controls="portal-sidebar"
             >
               <Menu size={20} />
             </button>
             <div className="hidden min-w-0 items-center gap-2 text-xs sm:flex">
+              {location.parent && (
+                <>
+                  <span className="shrink-0 text-[var(--muted)]">
+                    {location.parent}
+                  </span>
+                  <ChevronRight
+                    size={12}
+                    aria-hidden="true"
+                    className="shrink-0 text-[var(--muted)]"
+                  />
+                </>
+              )}
               <span className="truncate font-semibold text-[var(--ink)]">
-                {isProject && state.project.id
-                  ? state.project.name
-                  : [...deliveryManagement, ...capabilities].find(
-                      ([href]) => href === pathname,
-                    )?.[1] || "FDE Portal"}
+                {location.title}
               </span>
               {isProject && state.project.id && (
                 <Badge tone="info">{state.project.stage}</Badge>

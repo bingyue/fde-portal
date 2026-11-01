@@ -254,6 +254,11 @@ select:focus-visible {
 @media (max-width: 900px) {
   .portal-sidebar {
     transform: translateX(-100%);
+    visibility: hidden;
+  }
+  .portal-sidebar[data-open="true"] {
+    transform: translateX(0);
+    visibility: visible;
   }
   .portal-main {
     margin-left: 0 !important;
