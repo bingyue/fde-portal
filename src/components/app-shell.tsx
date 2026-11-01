@@ -5,6 +5,7 @@ import {
   Activity,
   Archive,
   Blocks,
+  BookOpen,
   BriefcaseBusiness,
   CheckSquare2,
   CircleUserRound,
@@ -44,6 +45,7 @@ const deliveryManagement = [
 ] as const satisfies readonly NavItem[];
 
 const capabilities = [
+  ["/learn", "学习中心", BookOpen],
   ["/templates", "模板中心", Blocks],
   ["/project/assets", "资产中心", Archive],
   ["/skills", "Skill 中心", Workflow],

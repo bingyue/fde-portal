@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Check, Layers3, Plus, Settings2 } from "lucide-react";
+import {
+  ArrowUpRight,
+  BookOpen,
+  Check,
+  Layers3,
+  Plus,
+  Settings2,
+} from "lucide-react";
 import { Button, Field, Input, Modal, Select, Textarea } from "@/components/ui";
 import { ThemeSelector } from "@/components/theme-provider";
 import { stages, type WorkProject } from "@/lib/workbench/model";
@@ -123,6 +130,10 @@ export function WorkbenchApp() {
           </Button>
         </div>
         <nav className="wb-topnav">
+          <Link href="/learn" aria-label="学习中心">
+            <BookOpen size={15} />
+            <span>学习中心</span>
+          </Link>
           <Link href="/settings/ai">
             <Settings2 size={15} />
             <span>模型配置</span>
